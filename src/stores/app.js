@@ -3,6 +3,8 @@ import { defineStore } from "pinia";
 export const useStore = defineStore("main", {
 	state: () => ({
 		loggedIn: false,
+		montageName: "",
+		share: false,
 	}),
 	getters: {},
 	actions: {
@@ -11,6 +13,12 @@ export const useStore = defineStore("main", {
 		},
 		logOut() {
 			this.loggedIn = false;
+		},
+		setName(nm) {
+			this.montageName = nm;
+		},
+		shareMontage(val) {
+			this.share = val;
 		},
 	},
 });

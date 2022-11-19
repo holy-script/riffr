@@ -37,23 +37,26 @@ export default route(function ({ store }) {
 		history: createHistory(process.env.VUE_ROUTER_BASE),
 	});
 
-	Router.beforeEach(async (to, from, next) => {
-		const res = await getUser();
-		if (res) {
-			appStore.logIn();
+	Router.beforeEach(async (to, from) => {
+		let softNav = true;
+
+		if (!from.name) {
+			softNav = false;
+			const user = await getUser();
+			if (user) appStore.logIn();
 		}
 		if (to.meta.requiresAuth) {
 			if (!appStore.loggedIn) {
 				console.log("Not logged in, taking you home...");
-				next({
-					name: "Home",
-				});
-			} else {
-				next();
+				return softNav
+					? false
+					: {
+							name: "Home",
+					  };
 			}
-		} else {
-			next();
 		}
+
+		return true;
 	});
 
 	return Router;
