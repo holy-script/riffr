@@ -24,7 +24,7 @@
       </q-bar>
     </div>
     <q-page-sticky
-      v-if="multiple && !hidden"
+      v-if="multiple && !hidden && !isPlaying"
       position="right"
       :offset="[10, 0]"
     >
@@ -39,7 +39,7 @@
     <q-page-sticky
       position="left"
       :offset="[18, 18]"
-      v-show="!hidden"
+      v-show="!isPlaying && !hidden"
     >
       <div class="flex column items-center">
         <q-slider
@@ -58,6 +58,68 @@
         <q-chip icon="center_focus_strong">Zoom</q-chip>
       </div>
     </q-page-sticky>
+    <q-page-sticky
+      position="bottom-right"
+      :offset="[18, 18]"
+      v-show="!isPlaying && !hidden"
+    >
+      <div class="flex column items-center">
+        <q-knob
+          show-value
+          v-model="frameRate"
+          size="5rem"
+          :thickness="0.2"
+          color="orange"
+          center-color="grey-8"
+          track-color="transparent"
+          :min="4"
+          :max="10"
+        >
+          {{ frameRate }}
+        </q-knob>
+        <q-chip icon="shutter_speed">FPS</q-chip>
+      </div>
+    </q-page-sticky>
+    <q-page-sticky
+      position="bottom"
+      :offset="[0, 18]"
+    >
+      <q-fab
+        v-model="previewBtn"
+        label="Preview"
+        external-label
+        vertical-actions-align="left"
+        color="purple"
+        icon="keyboard_arrow_up"
+        direction="up"
+        square
+      >
+        <q-fab-action
+          square
+          external-label
+          color="primary"
+          @click="previewPublish"
+          icon="polyline"
+          label="Publish"
+        />
+        <q-fab-action
+          square
+          external-label
+          color="secondary"
+          @click="previewPause"
+          icon="pause_circle"
+          label="Pause"
+        />
+        <q-fab-action
+          square
+          external-label
+          color="orange"
+          @click="previewPlay"
+          icon="play_circle_filled"
+          label="Play"
+        />
+      </q-fab>
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -66,6 +128,7 @@ import { defineComponent, ref, onMounted, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
+import ml5 from "ml5";
 import gsap from "gsap";
 import { useWebWorker } from "@vueuse/core";
 
@@ -99,6 +162,12 @@ export default defineComponent({
     const bg = ref("#fae");
     const hidden = ref(false);
     const multiple = ref(false);
+    const frameRate = ref(7);
+    const previewBtn = ref(false);
+    const isPlaying = ref(false);
+    let delta, now, then, elapsed, started;
+    const capture = ref(false);
+    const montage = ref([]);
 
     const { data, post, terminate } = useWebWorker("./bitmapWorker.js");
 
@@ -118,18 +187,31 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      /** @type {HTMLCanvasElement}*/
-      const canvas = document.getElementById("canvas");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      ctx = canvas.getContext("2d", {
-        willReadFrequently: true,
+      window.addEventListener("beforeunload", (evt) => {
+        evt.returnValue = true;
       });
-      cmd = "init";
-      post({
-        cmd,
-        images: [...images.value],
-      });
+      if (store.fileData.length == 0) {
+        $q.notify({
+          message: "Please upload images first!",
+          progress: true,
+        });
+        router.push({
+          name: "Picker",
+        });
+      } else {
+        /** @type {HTMLCanvasElement}*/
+        const canvas = document.getElementById("canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx = canvas.getContext("2d", {
+          willReadFrequently: true,
+        });
+        cmd = "init";
+        post({
+          cmd,
+          images: [...images.value],
+        });
+      }
     });
 
     const nextFace = () => {
@@ -257,6 +339,78 @@ export default defineComponent({
       draw();
     };
 
+    const playing = () => {
+      if (!isPlaying.value) {
+        return;
+      }
+
+      requestAnimationFrame(playing);
+
+      now = window.performance.now();
+      elapsed = now - then;
+
+      if (elapsed > delta) {
+        then = now - (elapsed % delta);
+        if (images.value.length > 1) {
+          if (capture.value) {
+            montage.value.push({
+              img: loadedImgs[index],
+              config: getImgConfig.value,
+            });
+            if (index == maxIndex) {
+              previewPause();
+              store.createMontage(montage.value);
+              store.setBg(bg.value);
+              store.setFps(frameRate.value);
+              router.push({
+                name: "Compiler",
+              });
+            }
+          }
+          nextFrame();
+        }
+      }
+    };
+
+    const previewPlay = () => {
+      isPlaying.value = true;
+      if (!started) {
+        delta = 1000 / frameRate.value;
+        then = window.performance.now();
+        started = true;
+        showBox.value = false;
+        playing();
+      }
+    };
+
+    const previewPause = () => {
+      isPlaying.value = false;
+      showBox.value = true;
+      started = false;
+    };
+
+    const previewPublish = () => {
+      if (isPlaying.value) {
+        previewPause();
+      }
+      $q.dialog({
+        title: "Create Montage",
+        message:
+          "Please make sure all your images are aligned correctly. Proceed to publishing the montage?",
+        cancel: true,
+        dark: true,
+      })
+        .onOk(() => {
+          capture.value = true;
+          index = 0;
+          draw();
+          previewPlay();
+        })
+        .onCancel(() => {
+          $q.notify("Feel free to keep working...");
+        });
+    };
+
     return {
       showBox,
       handleSwipe,
@@ -266,6 +420,12 @@ export default defineComponent({
       nextFace,
       changeScale,
       scaler,
+      frameRate,
+      previewBtn,
+      previewPlay,
+      previewPause,
+      previewPublish,
+      isPlaying,
     };
   },
 });

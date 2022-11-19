@@ -7,6 +7,10 @@ export const useStore = defineStore("main", {
 		share: false,
 		fileData: [],
 		boxData: [],
+		montage: [],
+		bg: "",
+		fps: 0,
+		vidObjUrl: "",
 	}),
 	getters: {},
 	actions: {
@@ -25,6 +29,18 @@ export const useStore = defineStore("main", {
 		setFiles(imgs, boxes) {
 			this.fileData = imgs;
 			this.boxData = boxes;
+		},
+		createMontage(arr) {
+			this.montage = arr;
+		},
+		setBg(color) {
+			this.bg = color;
+		},
+		setFps(fps) {
+			this.fps = fps;
+		},
+		createVid(url) {
+			this.vidObjUrl = url;
 		},
 	},
 });

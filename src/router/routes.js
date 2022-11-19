@@ -35,6 +35,14 @@ const routes = [
 				},
 				component: () => import("pages/EditorPage.vue"),
 			},
+			{
+				name: "Compiler",
+				path: "compile",
+				meta: {
+					requiresAuth: true,
+				},
+				component: () => import("pages/CompilerPage.vue"),
+			},
 		],
 	},
 

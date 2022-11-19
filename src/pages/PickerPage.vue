@@ -268,9 +268,9 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      // window.addEventListener("beforeunload", (evt) => {
-      //   evt.returnValue = true;
-      // });
+      window.addEventListener("beforeunload", (evt) => {
+        evt.returnValue = true;
+      });
     });
 
     const organizeImgs = (arr) => {
