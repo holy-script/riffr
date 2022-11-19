@@ -168,21 +168,17 @@ export default defineComponent({
     let delta, now, then, elapsed, started;
     const capture = ref(false);
     const montage = ref([]);
+    const marker = ref([]);
 
     const { data, post, terminate } = useWebWorker("./bitmapWorker.js");
 
     watch(data, () => {
       if (cmd == "seek") {
-        loadedImgs[index] = data.value;
-        multiple.value = boxes.value[index].length > 1;
-        draw();
-      }
-      if (cmd == "init") {
-        cmd = "seek";
-        post({
-          cmd,
-          index,
-        });
+        loadedImgs[data.value.i] = data.value.res;
+        if (data.value.i == 0) {
+          multiple.value = boxes.value[0].length > 1;
+          draw();
+        }
       }
     });
 
@@ -211,6 +207,10 @@ export default defineComponent({
           cmd,
           images: [...images.value],
         });
+        cmd = "seek";
+        for (let i in images.value) {
+          fetchImage(i);
+        }
       }
     });
 
@@ -268,14 +268,15 @@ export default defineComponent({
       gsap.to("#box", getBoxConfig.value);
     };
 
-    const fetchImage = () => {
-      if (typeof loadedImgs[index] != "object")
+    const fetchImage = async (i) => {
+      if (!marker.value[i]) {
         post({
           cmd,
-          index,
+          i,
         });
-      else {
-        multiple.value = boxes.value[index].length > 1;
+        marker.value[i] = true;
+      } else {
+        multiple.value = boxes.value[i].length > 1;
         draw();
       }
     };
@@ -283,13 +284,13 @@ export default defineComponent({
     const nextFrame = () => {
       index++;
       if (index > maxIndex) index = 0;
-      fetchImage();
+      fetchImage(index);
     };
 
     const prevFrame = () => {
       index--;
       if (index < 0) index = maxIndex;
-      fetchImage();
+      fetchImage(index);
     };
 
     const handleSwipe = async ({ evt, ...touch }) => {
@@ -359,6 +360,7 @@ export default defineComponent({
             });
             if (index == maxIndex) {
               previewPause();
+              showBox.value = false;
               store.createMontage(montage.value);
               store.setBg(bg.value);
               store.setFps(frameRate.value);

@@ -271,6 +271,15 @@ export default defineComponent({
       window.addEventListener("beforeunload", (evt) => {
         evt.returnValue = true;
       });
+      if (!store.montageName) {
+        $q.notify({
+          message: "Please start your montage from the Dashboard!",
+          progress: true,
+        });
+        router.push({
+          name: "Dashboard",
+        });
+      }
     });
 
     const organizeImgs = (arr) => {
