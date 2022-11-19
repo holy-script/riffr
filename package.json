@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@vueuse/core": "^9.5.0",
     "appwrite": "^10.1.0",
     "dotenv": "^16.0.3",
+    "gsap": "^3.11.3",
     "ml5": "^0.12.2",
     "pinia": "^2.0.11",
     "quasar": "^2.6.0",
