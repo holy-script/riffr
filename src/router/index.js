@@ -1,6 +1,13 @@
-import { route } from 'quasar/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
-import routes from './routes'
+import { route } from "quasar/wrappers";
+import {
+	createRouter,
+	createMemoryHistory,
+	createWebHistory,
+	createWebHashHistory,
+} from "vue-router";
+import routes from "./routes";
+import { useStore } from "stores/app";
+import { getUser } from "boot/appwrite";
 
 /*
  * If not building with SSR mode, you can
@@ -11,20 +18,43 @@ import routes from './routes'
  * with the Router instance.
  */
 
-export default route(function (/* { store, ssrContext } */) {
-  const createHistory = process.env.SERVER
-    ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory)
+export default route(function ({ store }) {
+	const appStore = useStore(store);
 
-  const Router = createRouter({
-    scrollBehavior: () => ({ left: 0, top: 0 }),
-    routes,
+	const createHistory = process.env.SERVER
+		? createMemoryHistory
+		: process.env.VUE_ROUTER_MODE === "history"
+		? createWebHistory
+		: createWebHashHistory;
 
-    // Leave this as is and make changes in quasar.conf.js instead!
-    // quasar.conf.js -> build -> vueRouterMode
-    // quasar.conf.js -> build -> publicPath
-    history: createHistory(process.env.VUE_ROUTER_BASE)
-  })
+	const Router = createRouter({
+		scrollBehavior: () => ({ left: 0, top: 0 }),
+		routes,
 
-  return Router
-})
+		// Leave this as is and make changes in quasar.conf.js instead!
+		// quasar.conf.js -> build -> vueRouterMode
+		// quasar.conf.js -> build -> publicPath
+		history: createHistory(process.env.VUE_ROUTER_BASE),
+	});
+
+	Router.beforeEach(async (to, from, next) => {
+		const res = await getUser();
+		if (res) {
+			appStore.logIn();
+		}
+		if (to.meta.requiresAuth) {
+			if (!appStore.loggedIn) {
+				console.log("Not logged in, taking you home...");
+				next({
+					name: "Home",
+				});
+			} else {
+				next();
+			}
+		} else {
+			next();
+		}
+	});
+
+	return Router;
+});
