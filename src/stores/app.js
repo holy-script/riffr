@@ -5,6 +5,8 @@ export const useStore = defineStore("main", {
 		loggedIn: false,
 		montageName: "",
 		share: false,
+		fileData: [],
+		boxData: [],
 	}),
 	getters: {},
 	actions: {
@@ -19,6 +21,10 @@ export const useStore = defineStore("main", {
 		},
 		shareMontage(val) {
 			this.share = val;
+		},
+		setFiles(imgs, boxes) {
+			this.fileData = imgs;
+			this.boxData = boxes;
 		},
 	},
 });

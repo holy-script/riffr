@@ -88,7 +88,7 @@
 
     <div class="q-mb-lg q-pb-lg">
       <div
-        v-if="imagesPreview.length"
+        v-if="imagesPreview.length && !detecting"
         :class="{
           'q-pa-md': true,
           dimmed: loading,
@@ -98,14 +98,16 @@
           <div
             v-for="img in imagesPreview"
             :key="img.index"
+            class="preview"
           >
-            <q-card class="q-ma-sm">
+            <q-card class="q-ma-sm dataCards">
               <q-card-section>
                 <q-img
                   loading="eager"
                   fetchpriority="high"
                   :src="img.url"
                   fit="contain"
+                  class="cardImg"
                   :alt="img.name"
                   :placeholder-src="loadGif"
                   no-spinner
@@ -149,14 +151,38 @@
           alt="Loading..."
         ></q-img>
       </div>
+      <div
+        v-if="detecting"
+        class="absolute-center"
+      >
+        <q-img
+          width="25vw"
+          :src="detectGif"
+          alt="Detecting..."
+        />
+        <div class="text-subtitle1 text-center">Detecting Faces...</div>
+        <q-linear-progress
+          size="25px"
+          :value="progress / images.length"
+          color="accent"
+        >
+          <div class="absolute-full flex flex-center">
+            <q-badge
+              color="white"
+              text-color="accent"
+              :label="`${Math.round((progress / images.length) * 100)} %`"
+            />
+          </div>
+        </q-linear-progress>
+      </div>
     </div>
 
     <q-page-sticky
-      v-if="images.length"
+      v-if="images.length && !detecting"
       position="bottom"
       :offset="[0, 18]"
     >
-      <div>
+      <div id="paginationTab">
         <q-pagination
           :disable="loading"
           v-model="currentPage"
@@ -172,6 +198,27 @@
         />
       </div>
     </q-page-sticky>
+    <q-page-sticky
+      v-if="images.length && !detecting"
+      position="bottom-right"
+      :offset="[18, 18]"
+      class="text-center"
+    >
+      <q-btn
+        color="indigo"
+        :disable="!modelReady"
+        label="DETECT"
+        @click="runModel"
+        class="q-mb-md"
+      />
+      <br>
+      <q-btn
+        color="orange"
+        :disable="!detected"
+        label="NEXT"
+        @click="startEditing"
+      />
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -180,9 +227,11 @@ import { defineComponent, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
+import ml5 from "ml5";
 import itemsIcon from "assets/icons/icons8-table-of-content-100.png";
 import loadGif from "assets/icons/icons8-download.gif";
 import trashIcon from "assets/icons/icons8-trash-100.png";
+import detectGif from "assets/icons/icons8-clock.gif";
 
 export default defineComponent({
   name: "PickerPage",
@@ -200,11 +249,28 @@ export default defineComponent({
     const pages = ref(1);
     const imagesPreview = ref([]);
     const loading = ref(false);
+    const modelReady = ref(false);
+    const progress = ref(0);
+    const boxes = ref([]);
+    const detecting = ref(false);
+    const notFound = ref([]);
+    const detected = ref(false);
+
+    const api = ml5.faceApi(
+      {
+        withLandmarks: true,
+        withDescriptors: false,
+      },
+      async () => {
+        modelReady.value = true;
+        $q.notify("ML5 model loaded into the browser!");
+      }
+    );
 
     onMounted(() => {
-      window.addEventListener("beforeunload", (evt) => {
-        evt.returnValue = true;
-      });
+      // window.addEventListener("beforeunload", (evt) => {
+      //   evt.returnValue = true;
+      // });
     });
 
     const organizeImgs = (arr) => {
@@ -366,6 +432,46 @@ export default defineComponent({
         });
     };
 
+    const runModel = async () => {
+      detecting.value = true;
+      if (modelReady.value) {
+        let img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(img.src);
+          api.detect(img, (err, res) => {
+            res.length
+              ? boxes.value.push(res)
+              : notFound.value.push(progress.value);
+            if (err) console.log(err);
+            progress.value++;
+            if (progress.value < images.value.length) runModel();
+            else {
+              detecting.value = false;
+              img = null;
+              if (notFound.value.length) {
+                console.log("Image(s) with no faces detected - removing!");
+                for (let i = notFound.value.length - 1; i >= 0; i--) {
+                  images.value.splice(notFound.value[i], 1);
+                }
+                currentPage.value = 1;
+                organizeImgs();
+              }
+              progress.value = 0;
+              notFound.value = [];
+              store.setFiles(images.value, boxes.value);
+              boxes.value = [];
+              detected.value = true;
+            }
+          });
+        };
+        img.src = URL.createObjectURL(images.value[progress.value]);
+      }
+    };
+
+    const startEditing = () => {
+      router.push({ name: "Editor" });
+    };
+
     return {
       removeImg,
       trashIcon,
@@ -388,7 +494,36 @@ export default defineComponent({
       store,
       info,
       dash,
+      detectGif,
+      progress,
+      detecting,
+      modelReady,
+      runModel,
+      detected,
+      startEditing,
     };
   },
 });
 </script>
+
+<style lang="sass">
+.cardImg
+	border-radius: 18px
+	width: 30vw
+	height: 30vw
+	background: aquamarine
+	img
+		padding: 0.5rem
+.dataCards
+	backdrop-filter: blur(5px)
+	background-color: rgba(255, 255, 255, 1)
+	border-radius: 26px
+	box-shadow: 35px 35px 68px 0px rgba(145, 192, 255, 0.5), inset -8px -8px 16px 0px rgba(145, 192, 255, 0.6), inset 0px 11px 28px 0px rgb(255, 255, 255)
+#paginationTab
+	background: antiquewhite
+	padding: 10px
+	border: 3px aqua solid
+	border-radius: 18px
+.preview
+	width: 40vw
+</style>

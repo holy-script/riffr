@@ -27,6 +27,14 @@ const routes = [
 				},
 				component: () => import("pages/PickerPage.vue"),
 			},
+			{
+				name: "Editor",
+				path: "edit",
+				meta: {
+					requiresAuth: true,
+				},
+				component: () => import("pages/EditorPage.vue"),
+			},
 		],
 	},
 
