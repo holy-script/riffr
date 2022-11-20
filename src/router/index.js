@@ -42,8 +42,8 @@ export default route(function ({ store }) {
 
 		if (!from.name) {
 			softNav = false;
-			const user = await getUser();
-			if (user) appStore.logIn();
+			// const user = await getUser();
+			// if (user) appStore.logIn();
 		}
 		if (to.meta.requiresAuth) {
 			if (!appStore.loggedIn) {

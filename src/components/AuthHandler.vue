@@ -196,39 +196,42 @@ export default defineComponent({
     };
 
     const show = (grid) => {
-      if (store.loggedIn) {
-        router.push({
-          name: "Dashboard",
-        });
-      } else {
-        $q.bottomSheet({
-          dark: true,
-          message: "Authentication Panel",
-          grid: true,
-          style: {
-            fontSize: "1rem",
-          },
-          class: "iconizer",
-          actions: [
-            {
-              label: "Sign Up",
-              img: signupIcon,
-              color: "primary",
-              id: "signup",
-            },
-            {
-              label: "Log In",
-              img: loginIcon,
-              color: "primary",
-              id: "login",
-            },
-          ],
-        }).onOk((action) => {
-          console.log("Action chosen:", action.id);
-          authFlow = action.id;
-          email();
-        });
-      }
+      router.push({
+        name: "Dashboard",
+      });
+      // if (store.loggedIn) {
+      //   router.push({
+      //     name: "Dashboard",
+      //   });
+      // } else {
+      //   $q.bottomSheet({
+      //     dark: true,
+      //     message: "Authentication Panel",
+      //     grid: true,
+      //     style: {
+      //       fontSize: "1rem",
+      //     },
+      //     class: "iconizer",
+      //     actions: [
+      //       {
+      //         label: "Sign Up",
+      //         img: signupIcon,
+      //         color: "primary",
+      //         id: "signup",
+      //       },
+      //       {
+      //         label: "Log In",
+      //         img: loginIcon,
+      //         color: "primary",
+      //         id: "login",
+      //       },
+      //     ],
+      //   }).onOk((action) => {
+      //     console.log("Action chosen:", action.id);
+      //     authFlow = action.id;
+      //     email();
+      //   });
+      // }
     };
 
     return { show };
