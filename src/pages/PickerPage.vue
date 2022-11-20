@@ -132,18 +132,10 @@
               <q-card-section class="q-pt-none flex items-center justify-evenly">
                 <q-card-actions>
                   <q-btn
-                    icon="arrow_back"
-                    size="sm"
-                  />
-                  <q-btn
                     color="red"
                     :icon="`img:${trashIcon}`"
                     size="md"
                     @click="removeImg(img.index)"
-                  />
-                  <q-btn
-                    icon="arrow_forward"
-                    size="sm"
                   />
                 </q-card-actions>
               </q-card-section>
@@ -224,7 +216,7 @@
       />
       <br>
       <q-btn
-        color="orange"
+        color="pink"
         :disable="!detected"
         label="NEXT"
         @click="startEditing"

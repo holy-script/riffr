@@ -7,7 +7,7 @@
       <canvas id="compileCanvas"></canvas>
     </div>
     <div v-else>
-      <q-bar>
+      <q-bar class="bg-teal">
         <q-icon name="laptop_chromebook" />
         <div>Riffr - Compiler</div>
 
@@ -26,7 +26,18 @@
           @click="dash"
         />
       </q-bar>
-      <h1>Done</h1>
+      <div
+        id="resCard"
+        class="q-pa-md q-ma-md"
+      >
+
+        <div class="text-center text-h2">
+          Compiled: {{ store.montageName }}
+        </div>
+        <q-separator />
+        <div class="text-center text-h6">Used {{ store.montage.length }} Images</div>
+
+      </div>
       <video
         id="vid"
         loop
@@ -39,8 +50,6 @@
 
 <script>
 import { defineComponent, ref, onMounted, watch } from "vue";
-import gsap from "gsap";
-import Flip from "gsap/Flip";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
@@ -223,4 +232,15 @@ export default defineComponent({
 	text-align: center
 #vid
 	width: 90vw
+#resCard
+	backdrop-filter: blur(5px)
+	background-color: rgba(255, 255, 255, 1)
+	border-radius: 26px
+	box-shadow: 35px 35px 68px 0px rgba(145, 192, 255, 0.5), inset -8px -8px 16px 0px rgba(145, 192, 255, 0.6), inset 0px 11px 28px 0px rgb(255, 255, 255)
+	width: 70vw
+	margin: auto
+	margin-top: 2em
+	margin-bottom: 2em
+	body.screen--sm &
+		width: 90vw
 </style>
