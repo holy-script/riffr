@@ -76,9 +76,13 @@ export default defineComponent({
 <style lang="sass">
 #floatCtr
 	position: relative
+	body.screen--xs &
+		margin-top: 4em
 #floatImg
 	width: 25vw
 	body.screen--sm &
+		width: 50vw
+	body.screen--xs &
 		width: 50vw
 #landingCard
 	backdrop-filter: blur(5px)

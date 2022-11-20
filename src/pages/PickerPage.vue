@@ -2,12 +2,12 @@
   <q-page class="pageBg">
     <q-bar class="bg-teal">
       <q-icon name="laptop_chromebook" />
-      <div>Riffr - Picker</div>
+      <div>Riffr</div>
 
       <q-space />
 
-      <div class="text-center q-mr-lg">
-        {{ store.montageName }}
+      <div class="text-center q-mr-md">
+        Picker
       </div>
 
       <q-space />
@@ -100,7 +100,6 @@
       <div
         v-if="imagesPreview.length && !detecting"
         :class="{
-          'q-pa-md': true,
           dimmed: loading,
         }"
       >
@@ -155,7 +154,7 @@
       </div>
       <div
         v-if="detecting"
-        class="absolute-center"
+        class="absolute-center text-center"
       >
         <q-img
           width="25vw"
@@ -209,7 +208,7 @@
     >
       <q-btn
         color="indigo"
-        :disable="!modelReady"
+        :loading="!modelReady"
         label="DETECT"
         @click="runModel"
         class="q-mb-md"
@@ -217,7 +216,7 @@
       <br>
       <q-btn
         color="pink"
-        :disable="!detected"
+        v-if="detected"
         label="NEXT"
         @click="startEditing"
       />
@@ -522,6 +521,9 @@ export default defineComponent({
 	body.screen--sm &
 		width: 30vw
 		height: 30vw
+	body.screen--xs &
+		width: 27vw
+		height: 27vw
 	img
 		padding: 0.5rem
 .dataCards

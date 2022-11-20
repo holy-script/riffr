@@ -9,12 +9,12 @@
     <div v-else>
       <q-bar class="bg-teal">
         <q-icon name="laptop_chromebook" />
-        <div>Riffr - Compiler</div>
+        <div>Riffr</div>
 
         <q-space />
 
-        <div class="text-center q-mr-lg">
-          {{ store.montageName }}
+        <div class="text-center q-mr-md">
+          Compiler
         </div>
 
         <q-space />
@@ -24,6 +24,7 @@
           flat
           icon="close"
           @click="dash"
+          label="Close"
         />
       </q-bar>
       <div
@@ -31,7 +32,7 @@
         class="q-pa-md q-ma-md"
       >
 
-        <div class="text-center text-h2">
+        <div class="text-center txtH2">
           Compiled: {{ store.montageName }}
         </div>
         <q-separator />
@@ -243,4 +244,7 @@ export default defineComponent({
 	margin-bottom: 2em
 	body.screen--sm &
 		width: 90vw
+.txtH2
+	font-weight: bold
+	font-size: 3em
 </style>

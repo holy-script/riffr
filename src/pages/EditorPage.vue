@@ -11,12 +11,12 @@
       ></div>
       <q-bar class="bar bg-teal">
         <q-icon name="laptop_chromebook" />
-        <div>Riffr - Editor</div>
+        <div>Riffr</div>
 
         <q-space />
 
-        <div class="text-center q-mr-lg">
-          {{ store.montageName }}
+        <div class="text-center q-mr-md">
+          Editor
         </div>
 
         <q-space />
@@ -186,7 +186,7 @@ export default defineComponent({
       width: 0,
       height: 0,
     });
-    const bg = ref("#fae");
+    const bg = ref("#000");
     const hidden = ref(false);
     const multiple = ref(false);
     const frameRate = ref(7);

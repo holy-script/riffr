@@ -1,7 +1,10 @@
 <template>
-  <q-page class="flex flex-center column pageBg">
-    <h1>Dashboard</h1>
-    <div class="text-h4">Follow These Steps to Begin! 👇</div>
+  <q-page
+    class="flex flex-center column pageBg"
+    padding
+  >
+    <div class="text-h2 q-my-md">Dashboard</div>
+    <div class="text-h4 text-center">Follow These Steps to Begin! 👇</div>
     <q-stepper
       v-model="step"
       ref="stepper"
