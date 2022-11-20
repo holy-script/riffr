@@ -42,5 +42,15 @@ export const useStore = defineStore("main", {
 		createVid(url) {
 			this.vidObjUrl = url;
 		},
+		clearConfig() {
+			this.montageName = "";
+			this.share = false;
+			this.fileData = [];
+			this.boxData = [];
+			this.montage = [];
+			this.bg = "";
+			this.fps = 0;
+			this.vidObjUrl = "";
+		},
 	},
 });

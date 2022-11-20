@@ -196,7 +196,9 @@ export default defineComponent({
 
     const show = (grid) => {
       if (store.loggedIn) {
-        $q.notify("You are already logged in!");
+        router.push({
+          name: "Dashboard",
+        });
       } else {
         $q.bottomSheet({
           dark: true,

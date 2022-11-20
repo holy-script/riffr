@@ -1,5 +1,8 @@
 <template>
-  <q-page id="compiler">
+  <q-page
+    id="compiler"
+    class="pageBg"
+  >
     <div v-if="compiling">
       <canvas id="compileCanvas"></canvas>
     </div>
@@ -7,6 +10,12 @@
       <q-bar>
         <q-icon name="laptop_chromebook" />
         <div>Riffr - Compiler</div>
+
+        <q-space />
+
+        <div class="text-center q-mr-lg">
+          {{ store.montageName }}
+        </div>
 
         <q-space />
 
@@ -198,6 +207,7 @@ export default defineComponent({
           router.push({
             name: "Dashboard",
           });
+          store.clearConfig();
         })
         .onDismiss(() => {
           tip();

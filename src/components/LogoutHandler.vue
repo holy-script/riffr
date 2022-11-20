@@ -79,9 +79,9 @@ export default defineComponent({
 	width: 3rem
 	height: 3rem
 	border-radius: 7px
-	background: #FF7B00
+	background: #ff9634
 	color: #001D3D
-	border: 3px solid #001D3D
+	border: 1px solid #001D3D
 
 #bottomLeft
 	width: 8px

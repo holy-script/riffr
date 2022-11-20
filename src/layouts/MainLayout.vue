@@ -1,7 +1,15 @@
 <template>
   <q-layout>
     <q-page-container>
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition
+          enter-active-class="control animated backInDown"
+          leave-active-class="control animated backOutDown"
+          mode="out-in"
+        >
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </q-page-container>
     <LogoutHandler />
   </q-layout>
@@ -19,3 +27,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="sass">
+.control
+	animation-duration: 1s
+	border: 3px solid #001D3D
+.pageBg
+	background: #e29d30
+body
+	background: #63d3ee
+</style>

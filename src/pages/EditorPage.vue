@@ -15,6 +15,12 @@
 
         <q-space />
 
+        <div class="text-center q-mr-lg">
+          {{ store.montageName }}
+        </div>
+
+        <q-space />
+
         <q-btn
           dense
           flat
@@ -329,6 +335,7 @@ export default defineComponent({
           router.push({
             name: "Dashboard",
           });
+          store.clearConfig();
         })
         .onDismiss(() => {
           tip();
@@ -364,6 +371,7 @@ export default defineComponent({
               store.createMontage(montage.value);
               store.setBg(bg.value);
               store.setFps(frameRate.value);
+              terminate();
               router.push({
                 name: "Compiler",
               });

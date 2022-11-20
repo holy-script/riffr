@@ -1,8 +1,14 @@
 <template>
-  <q-page>
+  <q-page class="pageBg">
     <q-bar class="bg-teal">
       <q-icon name="laptop_chromebook" />
       <div>Riffr - Picker</div>
+
+      <q-space />
+
+      <div class="text-center q-mr-lg">
+        {{ store.montageName }}
+      </div>
 
       <q-space />
 
@@ -11,11 +17,15 @@
         flat
         icon="close"
         @click="dash"
+        label="Close"
       />
     </q-bar>
     <div class="q-pa-sm q-pl-md row items-center">
       <div class="cursor-pointer non-selectable">
-        File
+        <span
+          class="q-px-md q-py-xs"
+          id="fileText"
+        >File</span>
         <q-menu ref="fileMenu">
           <q-list
             dense
@@ -98,16 +108,16 @@
           <div
             v-for="img in imagesPreview"
             :key="img.index"
-            class="preview"
+            class="col-sm-6 col-md-3"
           >
-            <q-card class="q-ma-sm dataCards">
-              <q-card-section>
+            <q-card class="q-ma-lg dataCards">
+              <q-card-section class="flex flex-center">
                 <q-img
                   loading="eager"
                   fetchpriority="high"
                   :src="img.url"
                   fit="contain"
-                  class="cardImg"
+                  class="text-center cardImg"
                   :alt="img.name"
                   :placeholder-src="loadGif"
                   no-spinner
@@ -435,6 +445,7 @@ export default defineComponent({
           router.push({
             name: "Dashboard",
           });
+          store.clearConfig();
         })
         .onDismiss(() => {
           tip();
@@ -518,9 +529,12 @@ export default defineComponent({
 <style lang="sass">
 .cardImg
 	border-radius: 18px
-	width: 30vw
-	height: 30vw
 	background: aquamarine
+	width: 17.5vw
+	height: 17.5vw
+	body.screen--sm &
+		width: 30vw
+		height: 30vw
 	img
 		padding: 0.5rem
 .dataCards
@@ -535,4 +549,8 @@ export default defineComponent({
 	border-radius: 18px
 .preview
 	width: 40vw
+#fileText
+	background: white
+	border-radius: 7px
+	border: 1px solid #001D3D
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center column">
+  <q-page class="flex flex-center column pageBg">
     <h1>Hello, world!</h1>
     <AuthHandler />
   </q-page>
