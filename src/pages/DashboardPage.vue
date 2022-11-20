@@ -7,7 +7,7 @@
       ref="stepper"
       color="primary"
       animated
-      class="q-my-lg text-h6"
+      class="q-my-lg text-subtitle2"
       id="stepCard"
     >
       <q-step

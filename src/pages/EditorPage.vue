@@ -90,6 +90,11 @@
       position="bottom"
       :offset="[0, 18]"
     >
+      <q-btn
+        icon="arrow_circle_left"
+        color="green"
+        @click="prevFrame"
+      />
       <q-fab
         v-model="previewBtn"
         label="Preview"
@@ -99,6 +104,7 @@
         icon="keyboard_arrow_up"
         direction="up"
         square
+        class="q-mx-md"
       >
         <q-fab-action
           square
@@ -125,6 +131,21 @@
           label="Play"
         />
       </q-fab>
+      <q-btn
+        icon="arrow_circle_right"
+        color="green"
+        @click="nextFrame"
+      />
+    </q-page-sticky>
+    <q-page-sticky
+      position="top"
+      :offset="[0, 36]"
+    >
+      <q-btn
+        color="blue"
+        :icon="hidden ? `visibility` : `visibility_off`"
+        @click="hidden = !hidden"
+      />
     </q-page-sticky>
   </q-page>
 </template>
@@ -437,6 +458,8 @@ export default defineComponent({
       previewPublish,
       isPlaying,
       store,
+      nextFrame,
+      prevFrame,
     };
   },
 });
@@ -459,4 +482,6 @@ export default defineComponent({
 	position: absolute
 	width: 100%
 	z-index: 10
+#editor
+	overflow: hidden
 </style>
