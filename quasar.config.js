@@ -86,6 +86,7 @@ module.exports = configure(function (/* ctx */) {
 			env: {
 				API_ENDPOINT: process.env.API_ENDPOINT,
 				PROJECT_ID: process.env.PROJECT_ID,
+				BUCKET_ID: process.env.BUCKET_ID,
 			},
 		},
 

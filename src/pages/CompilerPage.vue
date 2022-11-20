@@ -131,15 +131,10 @@ export default defineComponent({
           recordedChunks.push(event.data);
         };
 
-        mediaRecorder.onstop = function (event) {
+        mediaRecorder.onstop = (event) => {
           const blob = new Blob(recordedChunks, { type: "video/webm" });
           recordedChunks = [];
-          const formData = new FormData();
-          formData.append("montage", store.montageName);
-          formData.append("video", blob);
-          if (store.share) {
-            console.log("Share this montage, too!");
-          }
+
           const url = URL.createObjectURL(blob);
           res(url);
         };

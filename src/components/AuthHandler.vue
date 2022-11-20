@@ -4,6 +4,7 @@
     push
     color="primary"
     label="Let's Begin!"
+    size="lg"
     @click="show()"
   />
 </template>

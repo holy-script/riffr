@@ -436,6 +436,7 @@ export default defineComponent({
       previewPause,
       previewPublish,
       isPlaying,
+      store,
     };
   },
 });

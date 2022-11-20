@@ -169,6 +169,7 @@
           width="25vw"
           :src="detectGif"
           alt="Detecting..."
+          id="gif"
         />
         <div class="text-subtitle1 text-center">Detecting Faces...</div>
         <q-linear-progress
@@ -399,11 +400,6 @@ export default defineComponent({
         message: `Project Name: ${store.montageName}`,
         timeout: 0,
       });
-      let shareInfo = $q.notify({
-        position: "bottom",
-        message: `Add to Public Gallery: ${store.share ? "Yes" : "No"}`,
-        timeout: 0,
-      });
       let totalSize = 0;
       for (let i of images.value) {
         totalSize += i.size;
@@ -421,7 +417,6 @@ export default defineComponent({
         dark: true,
       }).onOk(() => {
         nameInfo();
-        shareInfo();
         sizeInfo();
       });
     };
@@ -553,4 +548,6 @@ export default defineComponent({
 	background: white
 	border-radius: 7px
 	border: 1px solid #001D3D
+#gif
+	border-radius: 7px
 </style>

@@ -46,36 +46,13 @@ export default defineComponent({
       })
         .onOk((data) => {
           store.setName(data.trim());
-          uploadGalleryDialog();
-        })
-        .onDismiss(() => {
-          note();
-        });
-    };
-
-    const uploadGalleryDialog = () => {
-      $q.dialog({
-        title: "Add to Public Web Gallery",
-        message:
-          "Would you additionally like to display your montage on the app?",
-        options: {
-          type: "toggle",
-          model: [true],
-          items: [
-            { label: "Yes, add my work!", value: true, color: "secondary" },
-          ],
-        },
-        cancel: true,
-        persistent: true,
-        dark: true,
-      })
-        .onOk((data) => {
-          data ? store.shareMontage(true) : store.shareMontage(false);
           router.push({
             name: "Picker",
           });
         })
-        .onDismiss(() => {});
+        .onDismiss(() => {
+          note();
+        });
     };
 
     return {

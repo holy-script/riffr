@@ -4,7 +4,6 @@ export const useStore = defineStore("main", {
 	state: () => ({
 		loggedIn: false,
 		montageName: "",
-		share: false,
 		fileData: [],
 		boxData: [],
 		montage: [],
@@ -22,9 +21,6 @@ export const useStore = defineStore("main", {
 		},
 		setName(nm) {
 			this.montageName = nm;
-		},
-		shareMontage(val) {
-			this.share = val;
 		},
 		setFiles(imgs, boxes) {
 			this.fileData = imgs;
