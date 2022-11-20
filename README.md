@@ -31,6 +31,11 @@ You're allowed to choose up to 120 images(nice, right?), run the detection on th
  > The final product will be something like this
 <img src = "https://user-images.githubusercontent.com/84567489/202893757-a2c5772f-e729-4b61-941c-52c9f40bc2fc.gif" width=500 />
 
+### Do you want to spin this up locally and experiement with it?
+
+<details>
+  <summary>Installation Guide</summary>
+
 ## Install the dependencies
 ```bash
 yarn
@@ -68,3 +73,6 @@ quasar build
 
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+  
+
+</details>
