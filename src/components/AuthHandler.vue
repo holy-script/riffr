@@ -16,7 +16,6 @@ import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
 import signupIcon from "assets/icons/icons8-add-100.png";
 import loginIcon from "assets/icons/icons8-enter-100.png";
-import { createUser, createSession } from "boot/appwrite";
 
 export default defineComponent({
   name: "AuthHandler",
@@ -123,7 +122,7 @@ export default defineComponent({
         .onOk(async (data) => {
           console.log("Password:", data);
           if (authFlow === "signup") {
-            const res = await createUser(emailVal.value, pwdVal.value);
+            const res = "";
             if (typeof res == "object") {
               $q.notify({
                 message: "User created successfully, please log in!",
@@ -138,7 +137,7 @@ export default defineComponent({
               });
             }
           } else {
-            const res = await createSession(emailVal.value, pwdVal.value);
+            const res = "";
             if (typeof res == "object") {
               store.logIn();
               router.push({

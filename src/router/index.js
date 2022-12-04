@@ -7,7 +7,6 @@ import {
 } from "vue-router";
 import routes from "./routes";
 import { useStore } from "stores/app";
-import { getUser } from "boot/appwrite";
 
 /*
  * If not building with SSR mode, you can

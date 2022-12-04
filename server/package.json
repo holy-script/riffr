@@ -1,0 +1,24 @@
+{
+  "name": "riffr-server",
+  "version": "1.0.0",
+  "description": "Backend server for Riffr",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "author": "Palash Johri <palashjohricool@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "connect-history-api-fallback": "^2.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}

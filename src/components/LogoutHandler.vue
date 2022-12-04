@@ -26,7 +26,6 @@ import { defineComponent } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useStore } from "stores/app";
-import { endSession } from "boot/appwrite";
 import logoutIcon from "assets/icons/icons8-logout-100.png";
 
 export default defineComponent({
@@ -44,7 +43,7 @@ export default defineComponent({
         cancel: true,
         persistent: true,
       }).onOk(async () => {
-        const res = await endSession();
+        const res = "";
         if (typeof res == "object") {
           $q.notify({
             message: "Logged Out!",
