@@ -27,6 +27,7 @@ import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useStore } from "stores/app";
 import logoutIcon from "assets/icons/icons8-logout-100.png";
+import { api } from "boot/axios";
 
 export default defineComponent({
   name: "LogoutHandler",
@@ -42,11 +43,10 @@ export default defineComponent({
         message: "Are you sure about logging out?",
         cancel: true,
         persistent: true,
-      }).onOk(async () => {
-        const res = "";
-        if (typeof res == "object") {
+      }).onOk(() => {
+        api.post("/auth/logout").then((res) => {
           $q.notify({
-            message: "Logged Out!",
+            message: res.data.message,
             color: "dark",
             progress: true,
           });
@@ -54,13 +54,7 @@ export default defineComponent({
           router.push({
             name: "Home",
           });
-        } else {
-          $q.notify({
-            message: res,
-            color: "dark",
-            progress: true,
-          });
-        }
+        });
       });
     }
 

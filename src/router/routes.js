@@ -12,10 +12,18 @@ const routes = [
 				component: () => import("pages/IndexPage.vue"),
 			},
 			{
+				name: "Onboard",
+				path: "welcome",
+				meta: {
+					requiresAuth: true,
+				},
+				component: () => import("pages/OnboardPage.vue"),
+			},
+			{
 				name: "Dashboard",
 				path: "dash",
 				meta: {
-					requiresAuth: false,
+					requiresAuth: true,
 				},
 				component: () => import("pages/DashboardPage.vue"),
 			},
@@ -23,7 +31,7 @@ const routes = [
 				name: "Picker",
 				path: "pick",
 				meta: {
-					requiresAuth: false,
+					requiresAuth: true,
 				},
 				component: () => import("pages/PickerPage.vue"),
 			},
@@ -31,7 +39,7 @@ const routes = [
 				name: "Editor",
 				path: "edit",
 				meta: {
-					requiresAuth: false,
+					requiresAuth: true,
 				},
 				component: () => import("pages/EditorPage.vue"),
 			},
@@ -39,7 +47,7 @@ const routes = [
 				name: "Compiler",
 				path: "compile",
 				meta: {
-					requiresAuth: false,
+					requiresAuth: true,
 				},
 				component: () => import("pages/CompilerPage.vue"),
 			},

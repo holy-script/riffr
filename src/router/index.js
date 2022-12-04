@@ -7,6 +7,7 @@ import {
 } from "vue-router";
 import routes from "./routes";
 import { useStore } from "stores/app";
+import { api } from "boot/axios";
 
 /*
  * If not building with SSR mode, you can
@@ -41,8 +42,13 @@ export default route(function ({ store }) {
 
 		if (!from.name) {
 			softNav = false;
-			// const user = await getUser();
-			// if (user) appStore.logIn();
+			try {
+				const user = await api.get("/api/validate");
+				console.log(user);
+				if (user) appStore.logIn(user.data);
+			} catch (err) {
+				console.log(err.response.data.message);
+			}
 		}
 		if (to.meta.requiresAuth) {
 			if (!appStore.loggedIn) {

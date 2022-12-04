@@ -42,7 +42,6 @@ import { defineComponent, onMounted } from "vue";
 import AuthHandler from "components/AuthHandler.vue";
 import gsap from "gsap";
 import camImg from "assets/images/cam.png";
-import {api} from "boot/axios"
 
 export default defineComponent({
   name: "IndexPage",
@@ -67,7 +66,6 @@ export default defineComponent({
         })
         .repeat(-1);
     });
-		api.get().then(res => console.log(res)).catch(err => console.log(err))
     return {
       camImg,
     };

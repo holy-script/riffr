@@ -3,6 +3,8 @@ import { defineStore } from "pinia";
 export const useStore = defineStore("main", {
 	state: () => ({
 		loggedIn: false,
+		verified: false,
+		onboarded: false,
 		montageName: "",
 		fileData: [],
 		boxData: [],
@@ -13,11 +15,16 @@ export const useStore = defineStore("main", {
 	}),
 	getters: {},
 	actions: {
-		logIn() {
+		logIn(user) {
 			this.loggedIn = true;
+			this.verified = user.verified;
+			this.onboarded = user.onboarded;
 		},
 		logOut() {
 			this.loggedIn = false;
+		},
+		verify() {
+			this.verified = true;
 		},
 		setName(nm) {
 			this.montageName = nm;

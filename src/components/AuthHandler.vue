@@ -16,6 +16,7 @@ import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
 import signupIcon from "assets/icons/icons8-add-100.png";
 import loginIcon from "assets/icons/icons8-enter-100.png";
+import { api } from "boot/axios";
 
 export default defineComponent({
   name: "AuthHandler",
@@ -121,36 +122,36 @@ export default defineComponent({
         })
         .onOk(async (data) => {
           console.log("Password:", data);
-          if (authFlow === "signup") {
-            const res = "";
-            if (typeof res == "object") {
+          let url = authFlow === "signup" ? "/auth/signup" : "/auth/login";
+          api
+            .post(url, {
+              email: emailVal.value,
+              password: pwdVal.value,
+            })
+            .then((res) => {
               $q.notify({
-                message: "User created successfully, please log in!",
+                message: res.data.message,
                 color: "dark",
                 progress: true,
               });
-            } else {
-              $q.notify({
-                message: res,
-                color: "dark",
-                progress: true,
-              });
-            }
-          } else {
-            const res = "";
-            if (typeof res == "object") {
-              store.logIn();
-              router.push({
-                name: "Dashboard",
-              });
-            } else {
-              $q.notify({
-                message: res,
-                color: "dark",
-                progress: true,
-              });
-            }
-          }
+              if (authFlow === "login") {
+                store.logIn(res.data);
+                if (store.onboarded) {
+                  router.push({
+                    name: "Dashboard",
+                  });
+                } else {
+                  router.push({
+                    name: "Onboard",
+                  });
+                }
+              }
+            })
+            .catch(
+              (err) =>
+                $q.notify(err.response.data.message) &&
+                console.log(err.response.status)
+            );
         })
         .onDismiss(() => {
           toggle();
@@ -195,42 +196,45 @@ export default defineComponent({
     };
 
     const show = (grid) => {
-      router.push({
-        name: "Dashboard",
-      });
-      // if (store.loggedIn) {
-      //   router.push({
-      //     name: "Dashboard",
-      //   });
-      // } else {
-      //   $q.bottomSheet({
-      //     dark: true,
-      //     message: "Authentication Panel",
-      //     grid: true,
-      //     style: {
-      //       fontSize: "1rem",
-      //     },
-      //     class: "iconizer",
-      //     actions: [
-      //       {
-      //         label: "Sign Up",
-      //         img: signupIcon,
-      //         color: "primary",
-      //         id: "signup",
-      //       },
-      //       {
-      //         label: "Log In",
-      //         img: loginIcon,
-      //         color: "primary",
-      //         id: "login",
-      //       },
-      //     ],
-      //   }).onOk((action) => {
-      //     console.log("Action chosen:", action.id);
-      //     authFlow = action.id;
-      //     email();
-      //   });
-      // }
+      if (store.loggedIn) {
+        if (store.onboarded) {
+          router.push({
+            name: "Dashboard",
+          });
+        } else {
+          router.push({
+            name: "Onboard",
+          });
+        }
+      } else {
+        $q.bottomSheet({
+          dark: true,
+          message: "Authentication Panel",
+          grid: true,
+          style: {
+            fontSize: "1rem",
+          },
+          class: "iconizer",
+          actions: [
+            {
+              label: "Sign Up",
+              img: signupIcon,
+              color: "primary",
+              id: "signup",
+            },
+            {
+              label: "Log In",
+              img: loginIcon,
+              color: "primary",
+              id: "login",
+            },
+          ],
+        }).onOk((action) => {
+          console.log("Action chosen:", action.id);
+          authFlow = action.id;
+          email();
+        });
+      }
     };
 
     return { show };
