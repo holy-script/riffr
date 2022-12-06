@@ -1,19 +1,31 @@
 <template>
-  <q-btn
-    v-if="!store.verified"
-    label="Verify Code"
-    color="orange"
-    @click="verify"
-  />
-  <h3 v-else>Verified!</h3>
+  <div>
+    <q-avatar
+      rounded
+      size="5rem"
+      color="yellow"
+      class="q-mt-lg q-mb-lg"
+    >
+      <img :src="!store.verified ? otpIcon : verifyIcon">
+    </q-avatar>
+    <br>
+    <q-btn
+      :label="!store.verified ? `Verify Code` : `Verified!`"
+      color="orange"
+      @click="verify"
+      :disable="store.verified"
+    />
+  </div>
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
-import { api } from "src/boot/axios";
 import { useStore } from "stores/app";
+import otpIcon from "assets/icons/icons8-authentication-100.png";
+import verifyIcon from "assets/icons/icons8-approval-100.png";
+import { api } from "src/boot/axios";
 
 export default defineComponent({
   name: "EmailVerifier",
@@ -56,6 +68,8 @@ export default defineComponent({
     return {
       store,
       verify,
+      otpIcon,
+      verifyIcon,
     };
   },
 });

@@ -44,7 +44,6 @@ export default route(function ({ store }) {
 			softNav = false;
 			try {
 				const user = await api.get("/api/validate");
-				console.log(user);
 				if (user) appStore.logIn(user.data);
 			} catch (err) {
 				console.log(err.response.data.message);

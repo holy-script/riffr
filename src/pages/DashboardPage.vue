@@ -4,6 +4,18 @@
     padding
   >
     <div class="text-h2 q-my-md">Dashboard</div>
+    <q-avatar
+      rounded
+      size="10rem"
+      color="positive"
+      class="q-mt-lg q-mb-lg"
+    >
+      <img
+        v-if="svg"
+        :src="svg"
+      >
+    </q-avatar>
+    <AuthHandler />
     <div class="text-h4 text-center">Follow These Steps to Begin! 👇</div>
     <q-stepper
       v-model="step"
@@ -77,13 +89,21 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useStore } from "stores/app";
+import { createAvatar } from "@dicebear/avatars";
+import * as bigSmile from "@dicebear/big-smile";
+import { api } from "boot/axios";
+import AuthHandler from "components/AuthHandler.vue";
 
 export default defineComponent({
   name: "DashboardPage",
+
+  components: {
+    AuthHandler,
+  },
 
   setup() {
     const $q = useQuasar();
@@ -91,6 +111,12 @@ export default defineComponent({
     const store = useStore();
     const nameVal = ref("");
     const step = ref(1);
+    const svg = ref();
+
+    onMounted(async () => {
+      const dash = await api.get("/api/dash");
+      svg.value = createAvatar(bigSmile, dash.data.profile);
+    });
 
     const startPicking = () => {
       let note = $q.notify({
@@ -126,6 +152,7 @@ export default defineComponent({
     return {
       startPicking,
       step,
+      svg,
     };
   },
 });

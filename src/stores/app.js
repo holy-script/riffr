@@ -26,6 +26,9 @@ export const useStore = defineStore("main", {
 		verify() {
 			this.verified = true;
 		},
+		onboard() {
+			this.onboarded = true;
+		},
 		setName(nm) {
 			this.montageName = nm;
 		},

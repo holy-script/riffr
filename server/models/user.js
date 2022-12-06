@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
 		trim: true,
 		minLength: 1,
 		maxLength: 20,
+		default: "User",
 	},
 	email: {
 		type: String,
@@ -37,6 +38,7 @@ const userSchema = new mongoose.Schema({
 		required: true,
 		minLength: 6,
 		maxLength: 6,
+		default: 999999,
 	},
 	age: {
 		type: Number,
@@ -44,6 +46,11 @@ const userSchema = new mongoose.Schema({
 		default: 0,
 		minLength: 1,
 		maxLength: 200,
+	},
+	profile: {
+		type: Object,
+		required: false,
+		default: {},
 	},
 });
 

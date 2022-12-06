@@ -11,11 +11,11 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
+    "@dicebear/avatars": "^4.10.5",
+    "@dicebear/big-smile": "^4.10.5",
     "@quasar/extras": "^1.0.0",
     "@vueuse/core": "^9.5.0",
-    "appwrite": "^10.1.0",
     "axios": "^1.2.0",
-    "dotenv": "^16.0.3",
     "gsap": "^3.11.3",
     "ml5": "^0.12.2",
     "pinia": "^2.0.11",

@@ -3,32 +3,119 @@
     no-caps
     push
     color="primary"
-    label="Let's Begin!"
-    size="lg"
+    :label="!store.loggedIn ? `Let's Get Started!` : `Account Settings`"
     @click="show()"
   />
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
-import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
+import { useRouter } from "vue-router";
 import signupIcon from "assets/icons/icons8-add-100.png";
 import loginIcon from "assets/icons/icons8-enter-100.png";
+import changeIcon from "assets/icons/icons8-password-reset-100.png";
+import deleteIcon from "assets/icons/icons8-delete-database-100.png";
 import { api } from "boot/axios";
 
 export default defineComponent({
   name: "AuthHandler",
+
   setup() {
     const $q = useQuasar();
     const store = useStore();
     const router = useRouter();
 
-    let emailVal = ref("");
-    let pwdVal = ref("");
-    let authFlow = "";
+    const emailVal = ref("");
+    const pwdVal = ref("");
+    const pwdValOld = ref("");
     const pwdShow = ref(false);
+    const pwdIsNew = ref(false);
+
+    const signUp = async () => {
+      try {
+        const user = await api.post("/auth/signup", {
+          email: emailVal.value,
+          password: pwdVal.value,
+        });
+        $q.notify({
+          message: user.data.message,
+          color: "dark",
+        });
+      } catch (error) {
+        $q.notify({
+          message: error.response.data.message,
+          progress: true,
+          color: "dark",
+        });
+      }
+    };
+
+    const logIn = async () => {
+      try {
+        const user = await api.post("/auth/login", {
+          email: emailVal.value,
+          password: pwdVal.value,
+        });
+        $q.notify({
+          message: user.data.message,
+          color: "dark",
+        });
+        store.logIn(user.data);
+        router.push({
+          name: store.onboarded ? "Dashboard" : "Onboard",
+        });
+      } catch (error) {
+        $q.notify({
+          message: error.response.data.message,
+          color: "dark",
+          progress: true,
+        });
+      }
+    };
+
+    const deleteUser = async () => {
+      try {
+        const res = await api.delete("/api/delete");
+        $q.notify({
+          message: res.data.message,
+          color: "dark",
+        });
+        store.logOut();
+        router.push({
+          name: "Home",
+        });
+      } catch (error) {
+        $q.notify({
+          message: error.response.data.message,
+          color: "dark",
+          progress: true,
+        });
+      }
+    };
+
+    const changePassword = async () => {
+      try {
+        const res = await api.post("/api/reset", {
+          email: emailVal.value,
+          password: pwdValOld.value,
+          newPassword: pwdVal.value,
+        });
+        $q.notify({
+          message: res.data.message,
+          color: "dark",
+        });
+      } catch (error) {
+        $q.notify({
+          message: error.response.data.message,
+          color: "dark",
+          progress: true,
+        });
+      }
+      pwdVal.value = "";
+      pwdValOld.value = "";
+    };
 
     const notifier = (arr, position) => {
       let notif = $q.notify({
@@ -62,10 +149,10 @@ export default defineComponent({
       return notif;
     };
 
-    const email = () => {
+    const email = (title, next, nextMsg, nextAction) => {
       $q.dialog({
         dark: true,
-        title: authFlow === "signup" ? "Sign Up" : "Log In",
+        title,
         message: "What is your email?",
         prompt: {
           filled: true,
@@ -80,31 +167,51 @@ export default defineComponent({
         persistent: true,
       }).onOk((data) => {
         console.log("Email:", data);
-        if (authFlow === "signup") {
-          let toastClose = notifier(
-            [
-              "8-15 characters in length",
-              "At least one symbol",
-              "At least one number",
-              "At least two letters",
-              "Please follow these rules:",
-            ],
-            "top"
-          );
-          pwd(toastClose);
-        } else pwd();
+        next(title, nextMsg, nextAction);
       });
     };
 
-    const pwd = (close) => {
-      const dial = $q
+    const pwd = (title, message, action) => {
+      let instructions;
+      if (pwdIsNew.value) {
+        instructions = notifier(
+          [
+            "8-15 characters in length",
+            "At least one symbol",
+            "At least one number",
+            "At least two letters",
+            "Please follow these rules:",
+          ],
+          "top"
+        );
+      }
+      const toggle = $q.notify({
+        color: "dark",
+        position: "bottom",
+        message: "Password Visibility",
+        timeout: 0,
+        onDismiss: () => {
+          if (pwdIsNew.value) {
+            instructions();
+          }
+        },
+        actions: [
+          {
+            label: "TOGGLE",
+            handler: () => {
+              pwdShow.value = !pwdShow.value;
+              pwdPrompt.hide();
+              toggle();
+              pwd(title, message, action);
+            },
+          },
+        ],
+      });
+      const pwdPrompt = $q
         .dialog({
           dark: true,
-          title: authFlow === "signup" ? "Sign Up" : "Log In",
-          message:
-            authFlow === "signup"
-              ? "Set your password!"
-              : "Enter your password!",
+          title,
+          message,
           prompt: {
             filled: true,
             maxlength: 15,
@@ -120,128 +227,111 @@ export default defineComponent({
           cancel: true,
           persistent: true,
         })
-        .onOk(async (data) => {
+        .onOk((data) => {
           console.log("Password:", data);
-          let url = authFlow === "signup" ? "/auth/signup" : "/auth/login";
-          api
-            .post(url, {
-              email: emailVal.value,
-              password: pwdVal.value,
-            })
-            .then((res) => {
-              $q.notify({
-                message: res.data.message,
-                color: "dark",
-                progress: true,
-              });
-              if (authFlow === "login") {
-                store.logIn(res.data);
-                if (store.onboarded) {
-                  router.push({
-                    name: "Dashboard",
-                  });
-                } else {
-                  router.push({
-                    name: "Onboard",
-                  });
-                }
-              }
-            })
-            .catch(
-              (err) =>
-                $q.notify(err.response.data.message) &&
-                console.log(err.response.status)
-            );
+          toggle();
+          action();
         })
-        .onDismiss(() => {
+        .onCancel(() => {
           toggle();
         });
-      const toggle = $q.notify({
-        color: "dark",
-        position: "bottom",
-        message: "Password Visibility",
-        timeout: 0,
-        onDismiss: () => {
-          if (authFlow === "signup") {
-            close();
-          }
-        },
-        actions: [
-          {
-            label: "TOGGLE",
-            noDismiss: true,
-            handler: () => {
-              pwdShow.value = !pwdShow.value;
-              dial.hide();
-              toggle();
-              if (authFlow === "signup") {
-                close = notifier(
-                  [
-                    "8-15 characters in length",
-                    "At least one symbol",
-                    "At least one number",
-                    "At least two letters",
-                    "Please follow these rules:",
-                  ],
-                  "top"
-                );
-                pwd(close);
-              } else {
-                pwd();
-              }
-            },
-          },
-        ],
+    };
+
+    const removal = () => {
+      $q.dialog({
+        title: "Account Deletion",
+        message:
+          "Proceed with removal of your account and data associated with Montaggio?",
+        dark: true,
+        cancel: true,
+        ok: true,
+        persistent: true,
+        focus: "ok",
+      }).onOk(() => {
+        $q.dialog({
+          title: "Are you sure?",
+          message: "Your data will be permanently erased",
+          dark: true,
+          cancel: true,
+          ok: true,
+          persistent: true,
+          focus: "cancel",
+        }).onOk(() => {
+          deleteUser();
+        });
       });
     };
 
-    const show = (grid) => {
-      if (store.loggedIn) {
-        if (store.onboarded) {
-          router.push({
-            name: "Dashboard",
-          });
-        } else {
-          router.push({
-            name: "Onboard",
-          });
-        }
-      } else {
-        $q.bottomSheet({
-          dark: true,
-          message: "Authentication Panel",
-          grid: true,
-          style: {
-            fontSize: "1rem",
-          },
-          class: "iconizer",
-          actions: [
-            {
-              label: "Sign Up",
-              img: signupIcon,
-              color: "primary",
-              id: "signup",
-            },
-            {
-              label: "Log In",
-              img: loginIcon,
-              color: "primary",
-              id: "login",
-            },
-          ],
-        }).onOk((action) => {
-          console.log("Action chosen:", action.id);
-          authFlow = action.id;
-          email();
-        });
-      }
+    const change = () => {
+      pwdIsNew.value = true;
+      pwdValOld.value = pwdVal.value;
+      pwdVal.value = "";
+      pwd("Reset Password", "Enter a new password:", changePassword);
     };
 
-    return { show };
+    const show = (grid) => {
+      $q.bottomSheet({
+        dark: true,
+        message: "Choose an action:",
+        grid: true,
+        style: {
+          fontSize: "1rem",
+        },
+        class: "iconizer",
+        actions: store.loggedIn
+          ? [
+              {
+                label: "Change Password",
+                img: changeIcon,
+                color: "primary",
+                id: "reset",
+              },
+              {
+                label: "Remove Account & Data",
+                img: deleteIcon,
+                color: "primary",
+                id: "remove",
+              },
+            ]
+          : [
+              {
+                label: "Sign Up",
+                img: signupIcon,
+                color: "primary",
+                id: "signup",
+              },
+              {
+                label: "Log In",
+                img: loginIcon,
+                color: "primary",
+                id: "login",
+              },
+            ],
+      }).onOk((action) => {
+        console.log("Action chosen:", action.id);
+        switch (action.id) {
+          case "signup":
+            pwdIsNew.value = true;
+            email("Sign Up", pwd, "Set your password!", signUp);
+            break;
+          case "login":
+            pwdIsNew.value = false;
+            email("Sign In", pwd, "Enter your password!", logIn);
+            break;
+          case "reset":
+            pwdIsNew.value = false;
+            pwd("Reset Password", "Verify current password:", change);
+            break;
+          case "remove":
+            removal();
+        }
+      });
+    };
+
+    return { show, store };
   },
 });
 </script>
-
 
 <style lang="sass">
 .iconizer

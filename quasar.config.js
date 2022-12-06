@@ -8,8 +8,6 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-require("dotenv").config();
-
 const { configure } = require("quasar/wrappers");
 
 module.exports = configure(function (/* ctx */) {
@@ -83,11 +81,6 @@ module.exports = configure(function (/* ctx */) {
 			// vitePlugins: [
 			//   [ 'package-name', { ..options.. } ]
 			// ]
-			env: {
-				API_ENDPOINT: process.env.API_ENDPOINT,
-				PROJECT_ID: process.env.PROJECT_ID,
-				BUCKET_ID: process.env.BUCKET_ID,
-			},
 		},
 
 		// Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
