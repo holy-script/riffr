@@ -151,7 +151,14 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, watch, computed } from "vue";
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  computed,
+} from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
@@ -209,10 +216,12 @@ export default defineComponent({
       }
     });
 
+    const unloadWarn = async (evt) => {
+      evt.returnValue = true;
+    };
+
     onMounted(() => {
-      window.addEventListener("beforeunload", (evt) => {
-        evt.returnValue = true;
-      });
+      window.addEventListener("beforeunload", unloadWarn);
       if (store.fileData.length == 0) {
         $q.notify({
           message: "Please upload images first!",
@@ -239,6 +248,10 @@ export default defineComponent({
           fetchImage(i);
         }
       }
+    });
+
+    onBeforeUnmount(async () => {
+      window.removeEventListener("beforeunload", unloadWarn);
     });
 
     const nextFace = () => {

@@ -6,6 +6,7 @@ export const useStore = defineStore("main", {
 		verified: false,
 		onboarded: false,
 		montageName: "",
+		useBrowser: true,
 		fileData: [],
 		boxData: [],
 		montage: [],
@@ -31,6 +32,9 @@ export const useStore = defineStore("main", {
 		},
 		setName(nm) {
 			this.montageName = nm;
+		},
+		setUseBrowserML(val) {
+			this.useBrowser = val;
 		},
 		setFiles(imgs, boxes) {
 			this.fileData = imgs;

@@ -11,6 +11,19 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { jwtAuth } from "./middleware/jwtAuth.js";
+import fileUpload from "express-fileupload";
+import path from "path";
+import url from "url";
+import fs from "fs/promises";
+import "@tensorflow/tfjs-node";
+import canvas from "canvas";
+
+import faceapi from "@vladmandic/face-api";
+
+const { Canvas, Image, ImageData } = canvas;
+faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+await faceapi.nets.ssdMobilenetv1.loadFromDisk(path.join(__dirname, "model"));
 
 dotenv.config();
 
@@ -40,6 +53,11 @@ app.use((req, res, next) => {
 });
 app.use(history());
 app.use(cookieParser());
+app.use(
+	fileUpload({
+		useTempFiles: true,
+	})
+);
 
 mongoose.connect(process.env.MONGODB_CONNECTION_URI, {
 	ssl: true,
@@ -243,6 +261,16 @@ app.delete("/api/delete", [jwtAuth.verifyToken], async (req, res) => {
 				message: err.message,
 			});
 		});
+});
+
+app.post("/api/detect", [jwtAuth.verifyToken], async (req, res) => {
+	const file = req.files.image;
+	const img = await canvas.loadImage(file.tempFilePath);
+	const detections = await faceapi.detectAllFaces(img);
+	fs.unlink(file.tempFilePath);
+	res.status(200).send({
+		detections,
+	});
 });
 
 app.use("/", async (req, res) => {

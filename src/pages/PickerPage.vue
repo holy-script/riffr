@@ -93,6 +93,20 @@
           </q-list>
         </q-menu>
       </div>
+
+      <q-space />
+
+      <div>
+        Use Server
+        <q-toggle
+          v-model="store.useBrowser"
+          color="pink"
+          checked-icon="browser_updated"
+          unchecked-icon="dns"
+          keep-color
+        />
+        Use Browser
+      </div>
     </div>
     <q-separator />
 
@@ -210,7 +224,7 @@
         color="indigo"
         :loading="!modelReady"
         label="DETECT"
-        @click="runModel"
+        @click="store.useBrowser ? runModel() : serverDetect()"
         class="q-mb-md"
       />
       <br>
@@ -225,7 +239,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
@@ -234,6 +248,7 @@ import itemsIcon from "assets/icons/icons8-table-of-content-100.png";
 import loadGif from "assets/icons/icons8-download.gif";
 import trashIcon from "assets/icons/icons8-trash-100.png";
 import detectGif from "assets/icons/icons8-clock.gif";
+import { api } from "boot/axios";
 
 export default defineComponent({
   name: "PickerPage",
@@ -257,22 +272,24 @@ export default defineComponent({
     const detecting = ref(false);
     const notFound = ref([]);
     const detected = ref(false);
+    const faceApi = ref({});
 
-    const api = ml5.faceApi(
-      {
-        withLandmarks: true,
-        withDescriptors: false,
-      },
-      async () => {
-        modelReady.value = true;
-        $q.notify("ML5 model loaded into the browser!");
-      }
-    );
+    const unloadWarn = async (evt) => {
+      evt.returnValue = true;
+    };
 
-    onMounted(() => {
-      window.addEventListener("beforeunload", (evt) => {
-        evt.returnValue = true;
-      });
+    onMounted(async () => {
+      faceApi.value = ml5.faceApi(
+        {
+          withLandmarks: true,
+          withDescriptors: false,
+        },
+        async () => {
+          modelReady.value = true;
+          $q.notify("ML5 model loaded into the browser!");
+        }
+      );
+      window.addEventListener("beforeunload", unloadWarn);
       if (!store.montageName) {
         $q.notify({
           message: "Please start your montage from the Dashboard!",
@@ -282,6 +299,10 @@ export default defineComponent({
           name: "Dashboard",
         });
       }
+    });
+
+    onBeforeUnmount(async () => {
+      window.removeEventListener("beforeunload", unloadWarn);
     });
 
     const organizeImgs = (arr) => {
@@ -444,7 +465,8 @@ export default defineComponent({
         let img = new Image();
         img.onload = () => {
           URL.revokeObjectURL(img.src);
-          api.detect(img, (err, res) => {
+          faceApi.value.detect(img, (err, res) => {
+            console.log(res);
             res.length
               ? boxes.value.push(res)
               : notFound.value.push(progress.value);
@@ -474,7 +496,60 @@ export default defineComponent({
       }
     };
 
+    const serverDetect = async () => {
+      detecting.value = true;
+      for (let image of images.value) {
+        const form = new FormData();
+        form.append("image", image, image.name);
+        try {
+          const res = (
+            await api.post("/api/detect", form, {
+              "Content-Type": "multipart/form-data",
+            })
+          ).data.detections;
+          for (let i in res) {
+            res[i] = {
+              alignedRect: {
+                box: {
+                  left: res[i]._box._x,
+                  top: res[i]._box._y,
+                  width: res[i]._box._width,
+                  height: res[i]._box._height,
+                },
+              },
+            };
+          }
+          res.length > 0
+            ? boxes.value.push(res)
+            : notFound.value.push(progress.value);
+          progress.value++;
+        } catch (error) {
+          break;
+          $q.notify({
+            message: error.response.data.message,
+            color: "dark",
+            progress: true,
+          });
+        }
+      }
+      detecting.value = false;
+      if (notFound.value.length) {
+        console.log("Image(s) with no faces detected - removing!");
+        for (let i = notFound.value.length - 1; i >= 0; i--) {
+          images.value.splice(notFound.value[i], 1);
+        }
+        currentPage.value = 1;
+        organizeImgs();
+      }
+      progress.value = 0;
+      notFound.value = [];
+      store.setFiles(images.value, boxes.value);
+      boxes.value = [];
+      detected.value = true;
+    };
+
     const startEditing = () => {
+      faceApi.value = null;
       router.push({ name: "Editor" });
     };
 
@@ -505,6 +580,7 @@ export default defineComponent({
       detecting,
       modelReady,
       runModel,
+      serverDetect,
       detected,
       startEditing,
     };
