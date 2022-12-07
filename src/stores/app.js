@@ -6,13 +6,15 @@ export const useStore = defineStore("main", {
 		verified: false,
 		onboarded: false,
 		montageName: "",
-		useBrowser: true,
+		useBrowser: false,
 		fileData: [],
 		boxData: [],
 		montage: [],
 		bg: "",
 		fps: 0,
+		isExtWebm: false,
 		vidObjUrl: "",
+		gifObjUrl: "",
 	}),
 	getters: {},
 	actions: {
@@ -49,8 +51,14 @@ export const useStore = defineStore("main", {
 		setFps(fps) {
 			this.fps = fps;
 		},
+		useExtWebm(val) {
+			this.isExtWebm = val;
+		},
 		createVid(url) {
 			this.vidObjUrl = url;
+		},
+		createGif(url) {
+			this.gifObjUrl = url;
 		},
 		clearConfig() {
 			this.montageName = "";

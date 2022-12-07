@@ -42,9 +42,15 @@
       <video
         id="vid"
         loop
+        v-if="store.vidObjUrl"
         :src="store.vidObjUrl"
         controls
       ></video>
+      <img
+        v-if="store.gifObjUrl"
+        :src="store.gifObjUrl"
+        alt="GIF HERE"
+      >
     </div>
   </q-page>
 </template>
@@ -54,6 +60,7 @@ import { defineComponent, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
+import gifshot from "gifshot";
 
 export default defineComponent({
   name: "CompilerPage",
@@ -70,13 +77,15 @@ export default defineComponent({
       elapsed,
       delta,
       ctx,
+      /** @type {HTMLCanvasElement} */
       canvas,
       started = false,
       capture = false,
       mediaRecorder,
       stream,
       drawStop = false,
-      compDial;
+      compDial,
+      snapshots = [];
 
     const unloadWarn = async (evt) => {
       evt.returnValue = true;
@@ -111,27 +120,44 @@ export default defineComponent({
         started = true;
         compileMontage();
       }
-      if (val == store.montage.length * 2 + 1) {
+      if (val == store.montage.length * 2 + store.isExtWebm ? 1 : 0) {
         capture = true;
-        record(canvas)
-          .then((res) => {
-            store.createVid(res);
-            $q.notify("Success!");
-          })
-          .catch((err) => console.log(err));
+        if (store.isExtWebm)
+          recordVid(canvas)
+            .then((res) => {
+              store.createVid(res);
+              $q.notify("Success!");
+            })
+            .catch((err) => console.log(err));
       }
       if (val == store.montage.length * 3) {
-        if (mediaRecorder.state === "recording") {
+        if (store.isExtWebm) {
           then = window.performance.now();
           setTimeout(() => {
             drawStop = true;
             mediaRecorder.stop();
           }, 1000 / store.fps);
+        } else {
+          then = window.performance.now();
+          setTimeout(() => {
+            drawStop = true;
+          }, 1000 / store.fps);
+          gifshot.createGIF(
+            {
+              images: snapshots,
+              interval: 1 / store.fps,
+              gifWidth: window.innerWidth,
+              gifHeight: window.innerHeight,
+            },
+            (obj) => {
+              store.createGif(obj.image);
+            }
+          );
         }
       }
     });
 
-    const record = (canvas) => {
+    const recordVid = (canvas) => {
       let recordedChunks = [];
       return new Promise(function (res, rej) {
         stream = canvas.captureStream(0);
@@ -192,7 +218,9 @@ export default defineComponent({
           finalImgs.value[0].config.height
         );
         if (capture) {
-          stream.getVideoTracks()[0].requestFrame();
+          store.isExtWebm
+            ? stream.getVideoTracks()[0].requestFrame()
+            : snapshots.push(canvas.toDataURL("image/png", 1));
         }
         finalImgs.value.push(finalImgs.value.shift());
         count.value++;

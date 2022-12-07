@@ -222,7 +222,7 @@
     >
       <q-btn
         color="indigo"
-        :loading="!modelReady"
+        :loading="store.useBrowser ? !modelReady : false"
         label="DETECT"
         @click="store.useBrowser ? runModel() : serverDetect()"
         class="q-mb-md"
@@ -239,7 +239,14 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, onBeforeUnmount } from "vue";
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  computed,
+} from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
@@ -279,16 +286,20 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      faceApi.value = ml5.faceApi(
-        {
-          withLandmarks: true,
-          withDescriptors: false,
-        },
-        async () => {
-          modelReady.value = true;
-          $q.notify("ML5 model loaded into the browser!");
-        }
-      );
+      const toggle = computed(() => store.useBrowser);
+      watch(toggle, async (val) => {
+        if (val)
+          faceApi.value = ml5.faceApi(
+            {
+              withLandmarks: true,
+              withDescriptors: false,
+            },
+            async () => {
+              modelReady.value = true;
+              $q.notify("ML5 model loaded into the browser!");
+            }
+          );
+      });
       window.addEventListener("beforeunload", unloadWarn);
       if (!store.montageName) {
         $q.notify({
@@ -466,7 +477,6 @@ export default defineComponent({
         img.onload = () => {
           URL.revokeObjectURL(img.src);
           faceApi.value.detect(img, (err, res) => {
-            console.log(res);
             res.length
               ? boxes.value.push(res)
               : notFound.value.push(progress.value);
