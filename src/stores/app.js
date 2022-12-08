@@ -12,9 +12,10 @@ export const useStore = defineStore("main", {
 		montage: [],
 		bg: "",
 		fps: 0,
-		isExtWebm: false,
+		isExtWebm: true,
 		vidObjUrl: "",
 		gifObjUrl: "",
+		memDebug: false,
 	}),
 	getters: {},
 	actions: {

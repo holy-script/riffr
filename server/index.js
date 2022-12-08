@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import User from "./models/user.js";
+import Montage from "./models/montage.js";
 import FormData from "form-data";
 import Mailgun from "mailgun.js";
 import bcrypt from "bcryptjs";
@@ -19,6 +20,7 @@ import "@tensorflow/tfjs-node";
 import canvas from "canvas";
 import faceapi from "@vladmandic/face-api";
 import { Storage } from "@google-cloud/storage";
+import { nanoid } from "nanoid/async";
 
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
@@ -116,17 +118,17 @@ app.post("/auth/signup", async (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
-	const userProfile = await User.findOne({
+	const user = await User.findOne({
 		email: req.body.email,
 	});
-	if (!userProfile) {
+	if (!user) {
 		res.status(404).send({
 			message: "User does not exist, please Sign Up!",
 		});
 	} else {
 		const passwordIsValid = bcrypt.compareSync(
 			req.body.password,
-			userProfile.password
+			user.password
 		);
 
 		passwordIsValid
@@ -134,7 +136,7 @@ app.post("/auth/login", async (req, res) => {
 					.status(200)
 					.cookie(
 						"accessToken",
-						jwt.sign({ email: userProfile.email }, secret, {
+						jwt.sign({ email: user.email }, secret, {
 							expiresIn: 86400, // 24 hours
 						}),
 						{
@@ -143,10 +145,10 @@ app.post("/auth/login", async (req, res) => {
 						}
 					)
 					.send({
-						email: userProfile.email,
+						email: user.email,
 						message: "Successfully Logged in for 24 hours!",
-						verified: userProfile.verified,
-						onboarded: userProfile.onboarded,
+						verified: user.verified,
+						onboarded: user.onboarded,
 					})
 			: res.status(401).send({
 					message: "Invalid Password!",
@@ -162,20 +164,20 @@ app.post("/auth/logout", async (req, res) => {
 });
 
 app.get("/api/validate", [jwtAuth.verifyToken], async (req, res) => {
-	const userProfile = await User.findOne({
+	const user = await User.findOne({
 		email: req.userEmail,
 	});
 	res.status(200).send({
-		verified: userProfile.verified,
-		onboarded: userProfile.onboarded,
+		verified: user.verified,
+		onboarded: user.onboarded,
 	});
 });
 
 app.post("/api/verify", [jwtAuth.verifyToken], async (req, res) => {
-	const userProfile = await User.findOne({
+	const user = await User.findOne({
 		email: req.userEmail,
 	});
-	if (userProfile.otp == req.body.otp) {
+	if (user.otp == req.body.otp) {
 		await User.findOneAndUpdate(
 			{
 				email: req.userEmail,
@@ -215,29 +217,30 @@ app.post("/api/onboard", [jwtAuth.verifyToken], async (req, res) => {
 });
 
 app.get("/api/dash", [jwtAuth.verifyToken], async (req, res) => {
-	const userProfile = await User.findOne({
+	const user = await User.findOne({
 		email: req.userEmail,
 	});
 	res.status(200).send({
-		name: userProfile.name,
-		age: userProfile.age,
-		email: userProfile.email,
-		profile: userProfile.profile,
+		name: user.name,
+		age: user.age,
+		email: user.email,
+		profile: user.profile,
+		montages: user.montages,
 	});
 });
 
 app.post("/api/reset", [jwtAuth.verifyToken], async (req, res) => {
-	const userProfile = await User.findOne({
+	const user = await User.findOne({
 		email: req.userEmail,
 	});
-	if (!userProfile) {
+	if (!user) {
 		res.status(404).send({
 			message: "User does not exist, please Sign Up!",
 		});
 	} else {
 		const passwordIsValid = bcrypt.compareSync(
 			req.body.password,
-			userProfile.password
+			user.password
 		);
 
 		if (passwordIsValid) {
@@ -261,19 +264,21 @@ app.post("/api/reset", [jwtAuth.verifyToken], async (req, res) => {
 });
 
 app.delete("/api/delete", [jwtAuth.verifyToken], async (req, res) => {
-	User.deleteOne({
-		email: req.userEmail,
-	})
-		.then(() => {
-			res.status(200).send({
-				message: "Account Deleted - We're sorry to see you go 😢",
-			});
-		})
-		.catch((err) => {
-			res.status(404).send({
-				message: err.message,
-			});
+	try {
+		await User.deleteOne({
+			email: req.userEmail,
 		});
+		await Montage.deleteMany({
+			userId: req.userEmail,
+		});
+		res.status(200).send({
+			message: "Account Deleted - We're sorry to see you go 😢",
+		});
+	} catch (err) {
+		res.status(404).send({
+			message: err.message,
+		});
+	}
 });
 
 app.post("/api/detect", [jwtAuth.verifyToken], async (req, res) => {
@@ -293,13 +298,58 @@ app.post("/api/upload", [jwtAuth.verifyToken], async (req, res) => {
 		expires: Date.now() + 15 * 60 * 1000, // 15 minutes
 		contentType: "application/octet-stream",
 	};
+	const id = await nanoid(21);
+	const fileName = `${req.body.fileName}-${id}.${req.body.ext}`;
 	const [url] = await storage
 		.bucket(bucketName)
-		.file(req.body.fileName)
+		.file(fileName)
 		.getSignedUrl(options);
+	await Montage.create({
+		name: `${req.body.fileName}-${id}`,
+		shortName: req.body.fileName,
+		userId: req.userEmail,
+		link: `${process.env.BUCKET_LINK}${fileName}`,
+		ext: req.body.ext,
+		createdAt: Date.now(),
+		imageCount: req.body.count,
+	});
+	await User.findOneAndUpdate(
+		{
+			email: req.userEmail,
+		},
+		{
+			$push: {
+				montages: [`${req.body.fileName}-${id}`],
+			},
+		}
+	);
 	res.status(200).send({
 		message: "Starting Upload...",
 		url,
+		fileName: `${req.body.fileName}-${id}`,
+	});
+});
+
+app.get("/api/:montageName", [jwtAuth.verifyToken], async (req, res) => {
+	const montage = await Montage.findOne({
+		name: req.params.montageName,
+	});
+	if (!montage)
+		return res.status(404).send({
+			message: "Couldn't find a montage with this ID... 😕",
+		});
+	const user = await User.findOne({
+		email: montage.userId,
+	});
+	res.status(200).send({
+		message: `Check out this montage by ${user.name}! 👇`,
+		profile: user.profile,
+		link: montage.link,
+		createdAt: montage.createdAt,
+		userId: montage.userId,
+		ext: montage.ext,
+		shortName: montage.shortName,
+		imageCount: montage.imageCount,
 	});
 });
 

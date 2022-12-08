@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema({
 		required: false,
 		default: {},
 	},
+	montages: {
+		type: Array,
+		required: false,
+		default: [],
+	},
 });
 
 export default mongoose.model("User", userSchema);

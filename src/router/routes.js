@@ -51,6 +51,14 @@ const routes = [
 				},
 				component: () => import("pages/CompilerPage.vue"),
 			},
+			{
+				name: "Viewer",
+				path: "view/:id",
+				meta: {
+					requiresAuth: true,
+				},
+				component: () => import("pages/ViewerPage.vue"),
+			},
 		],
 	},
 

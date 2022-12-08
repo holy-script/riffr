@@ -27,7 +27,8 @@
     "form-data": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
     "mailgun.js": "^8.0.6",
-    "mongoose": "^6.7.5"
+    "mongoose": "^6.7.5",
+    "nanoid": "^4.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"

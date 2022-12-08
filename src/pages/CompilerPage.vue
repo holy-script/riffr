@@ -52,6 +52,40 @@
         alt="GIF HERE"
       >
     </div>
+    <q-dialog
+      v-model="showQRCode"
+      persistent
+      transition-show="scale"
+      transition-hide="scale"
+    >
+      <q-card class="bg-teal text-white">
+        <q-card-section>
+          <div class="text-h6">QR Code</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          Feel free to share this code to show off your montage! 🤘
+        </q-card-section>
+
+        <q-card-section class="q-pa-md text-center">
+          <img
+            :src="qrcode"
+            alt="QR Code Image"
+          />
+        </q-card-section>
+
+        <q-card-actions
+          align="right"
+          class="bg-white text-teal"
+        >
+          <q-btn
+            flat
+            label="OK"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -62,6 +96,8 @@ import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
 import gifshot from "gifshot";
 import { api } from "boot/axios";
+import { useQRCode } from "@vueuse/integrations/useQRCode";
+import { useClipboard } from "@vueuse/core";
 
 export default defineComponent({
   name: "CompilerPage",
@@ -73,6 +109,13 @@ export default defineComponent({
     const compiling = ref(true);
     const finalImgs = ref(store.montage);
     const count = ref(0);
+    const showQRCode = ref(false);
+    const storageLink = ref("");
+    const qrcode = useQRCode(storageLink, {
+      color: {
+        dark: `${store.bg}ff`,
+      },
+    });
     let then,
       now,
       elapsed,
@@ -118,7 +161,9 @@ export default defineComponent({
 
     const uploadFile = async (file) => {
       const signedUrl = await api.post("/api/upload", {
-        fileName: `${store.montageName}.${store.isExtWebm ? "webm" : "gif"}`,
+        fileName: store.montageName,
+        ext: store.isExtWebm ? "webm" : "gif",
+        count: store.montage.length,
       });
 
       $q.notify({
@@ -135,17 +180,35 @@ export default defineComponent({
         xhr.setRequestHeader("Content-Type", "application/octet-stream");
         xhr.send(file);
         xhr.addEventListener("load", () => {
+          storageLink.value = `${window.location.origin}/view/${signedUrl.data.fileName}`;
           $q.notify({
             message: "Uploaded to Riffr Gallery!",
             actions: [
               {
-                title: "LINK",
+                label: "LINK",
+                noDismiss: true,
+                handler: () => {
+                  const { text, copy, copied, isSupported } = useClipboard({
+                    storageLink,
+                  });
+                  copy(storageLink.value);
+                  $q.notify({
+                    message: "Copied Link to Media File!",
+                    progress: true,
+                    color: "dark",
+                    position: "top",
+                  });
+                },
               },
               {
-                title: "DISMISS",
+                label: "DISMISS",
               },
               {
-                title: "QR CODE",
+                label: "QR CODE",
+                noDismiss: true,
+                handler: () => {
+                  showQRCode.value = true;
+                },
               },
             ],
             timeout: 0,
@@ -303,6 +366,8 @@ export default defineComponent({
       store,
       compiling,
       dash,
+      showQRCode,
+      qrcode,
     };
   },
 });

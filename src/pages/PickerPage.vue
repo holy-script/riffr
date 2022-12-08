@@ -97,6 +97,20 @@
       <q-space />
 
       <div>
+        Gif
+        <q-toggle
+          v-model="store.isExtWebm"
+          color="pink"
+          checked-icon="movie"
+          unchecked-icon="gif"
+          keep-color
+        />
+        Video
+      </div>
+
+      <q-space />
+
+      <div>
         Use Server
         <q-toggle
           v-model="store.useBrowser"
