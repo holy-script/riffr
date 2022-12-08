@@ -43,6 +43,9 @@ export const useStore = defineStore("main", {
 			this.fileData = imgs;
 			this.boxData = boxes;
 		},
+		delBox(i) {
+			this.boxData.splice(i, 1);
+		},
 		createMontage(arr) {
 			this.montage = arr;
 		},

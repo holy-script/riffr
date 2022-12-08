@@ -47,10 +47,15 @@
         controls
       ></video>
       <img
-        v-if="store.gifObjUrl"
+        v-else-if="store.gifObjUrl"
         :src="store.gifObjUrl"
         alt="GIF HERE"
       >
+      <q-spinner-cube
+        v-else
+        size="xl"
+        color="primary"
+      />
     </div>
     <q-dialog
       v-model="showQRCode"
@@ -193,7 +198,7 @@ export default defineComponent({
                   });
                   copy(storageLink.value);
                   $q.notify({
-                    message: "Copied Link to Media File!",
+                    message: "Copied Media's Viewer Link!",
                     progress: true,
                     color: "dark",
                     position: "top",

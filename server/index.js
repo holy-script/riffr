@@ -54,7 +54,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
 	cors({
-		origin: ["http://localhost:9000"],
+		origin: [process.env.FRONTEND_URL],
 		optionsSuccessStatus: 200,
 		credentials: true,
 	})
@@ -271,6 +271,7 @@ app.delete("/api/delete", [jwtAuth.verifyToken], async (req, res) => {
 		await Montage.deleteMany({
 			userId: req.userEmail,
 		});
+		res.clearCookie("accessToken");
 		res.status(200).send({
 			message: "Account Deleted - We're sorry to see you go 😢",
 		});
@@ -319,7 +320,7 @@ app.post("/api/upload", [jwtAuth.verifyToken], async (req, res) => {
 		},
 		{
 			$push: {
-				montages: [`${req.body.fileName}-${id}`],
+				montages: `${req.body.fileName}-${id}`,
 			},
 		}
 	);

@@ -8,6 +8,8 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
+require("dotenv").config();
+
 const { configure } = require("quasar/wrappers");
 
 module.exports = configure(function (/* ctx */) {
@@ -81,6 +83,9 @@ module.exports = configure(function (/* ctx */) {
 			// vitePlugins: [
 			//   [ 'package-name', { ..options.. } ]
 			// ]
+			env: {
+				BACKEND_URL: process.env.BACKEND_URL,
+			},
 		},
 
 		// Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer

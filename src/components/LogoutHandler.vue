@@ -10,6 +10,7 @@
       <q-btn
         id="logout"
         @click="confirm"
+        color="blue"
       >
         <q-icon
           :name="`img:${logoutIcon}`"
@@ -90,7 +91,6 @@ export default defineComponent({
 	position: absolute
 	top: 4.75px
 	right: 1px
-	background: #001D3D
 	transform-origin: top
 	transform: rotate(315deg)
 </style>

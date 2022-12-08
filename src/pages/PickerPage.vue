@@ -22,10 +22,7 @@
     </q-bar>
     <div class="q-pa-sm q-pl-md row items-center">
       <div class="cursor-pointer non-selectable">
-        <span
-          class="q-px-md q-py-xs"
-          id="fileText"
-        >File</span>
+        <span class="q-px-md q-py-xs menuText q-mr-md">File</span>
         <q-menu ref="fileMenu">
           <q-list
             dense
@@ -37,7 +34,10 @@
                 outlined
                 accept="image/*"
                 v-model="images"
-                @update:model-value="organizeImgs"
+                @update:model-value="() => {
+									detected = false
+									organizeImgs()
+								}"
                 @rejected="onRejected"
                 multiple
                 max-files="120"
@@ -94,32 +94,46 @@
         </q-menu>
       </div>
 
-      <q-space />
-
-      <div>
-        Gif
-        <q-toggle
-          v-model="store.isExtWebm"
-          color="pink"
-          checked-icon="movie"
-          unchecked-icon="gif"
-          keep-color
-        />
-        Video
-      </div>
-
-      <q-space />
-
-      <div>
-        Use Server
-        <q-toggle
-          v-model="store.useBrowser"
-          color="pink"
-          checked-icon="browser_updated"
-          unchecked-icon="dns"
-          keep-color
-        />
-        Use Browser
+      <div class="cursor-pointer non-selectable">
+        <span class="q-px-md q-py-xs menuText q-mr-md">Options</span>
+        <q-menu>
+          <q-list
+            dense
+            style="min-width: 100px"
+          >
+            <q-item>
+              <q-item-section class="q-my-sm">
+                <div class="text-center">
+                  Make Gif
+                  <q-toggle
+                    v-model="store.isExtWebm"
+                    color="pink"
+                    checked-icon="movie"
+                    unchecked-icon="gif"
+                    keep-color
+                  />
+                  Make Video
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item>
+              <q-item-section class="q-my-sm">
+                <div class="text-center">
+                  Use Server
+                  <q-toggle
+                    v-model="store.useBrowser"
+                    color="pink"
+                    checked-icon="browser_updated"
+                    unchecked-icon="dns"
+                    keep-color
+                  />
+                  Use Browser
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
       </div>
     </div>
     <q-separator />
@@ -264,7 +278,6 @@ import {
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
-import ml5 from "ml5";
 import itemsIcon from "assets/icons/icons8-table-of-content-100.png";
 import loadGif from "assets/icons/icons8-download.gif";
 import trashIcon from "assets/icons/icons8-trash-100.png";
@@ -302,7 +315,8 @@ export default defineComponent({
     onMounted(async () => {
       const toggle = computed(() => store.useBrowser);
       watch(toggle, async (val) => {
-        if (val)
+        if (val) {
+          const ml5 = await import("ml5");
           faceApi.value = ml5.faceApi(
             {
               withLandmarks: true,
@@ -313,6 +327,7 @@ export default defineComponent({
               $q.notify("ML5 model loaded into the browser!");
             }
           );
+        }
       });
       window.addEventListener("beforeunload", unloadWarn);
       if (!store.montageName) {
@@ -330,7 +345,7 @@ export default defineComponent({
       window.removeEventListener("beforeunload", unloadWarn);
     });
 
-    const organizeImgs = (arr) => {
+    const organizeImgs = () => {
       loading.value = true;
       for (let i of imagesPreview.value) {
         URL.revokeObjectURL(i.url);
@@ -384,6 +399,7 @@ export default defineComponent({
 
     const removeImg = (i) => {
       images.value.splice(i, 1);
+      if (store.boxData.length > 0) store.delBox(i);
       if (!images.value.length) {
         imagesPreview.value = [];
         picker.value = null;
@@ -638,7 +654,7 @@ export default defineComponent({
 	border-radius: 18px
 .preview
 	width: 40vw
-#fileText
+.menuText
 	background: white
 	border-radius: 7px
 	border: 1px solid #001D3D

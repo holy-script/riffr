@@ -12,94 +12,93 @@
       padding
       arrows
       height="100vh"
-      class="bg-grey text-white"
+      class="bg-blue-grey-5 text-white"
       @before-transition="dismiss"
     >
       <q-carousel-slide
         name="intro"
         class="column no-wrap flex-center"
       >
-        <q-icon
-          name="live_tv"
-          size="56px"
-        />
-        <div class="q-mt-md text-center">
-          Intro Here
+        <div class="q-pa-md q-ma-md onboardCard text-center">
+          <div class="txtH2">
+            Wanna make beautiful photo montages?<br>
+            You're in the right place!<br>
+            Finish onboading to start creating stuff 😃
+          </div>
         </div>
-      </q-carousel-slide>
-      <q-carousel-slide
-        name="about"
-        class="column no-wrap flex-center"
-      >
-        <q-icon
-          name="layers"
-          size="56px"
-        />
-        <div class="q-mt-lg q-mb-lg text-center">
-          User Details Here
-          <EmailVerifier />
-        </div>
-        <q-btn
-          no-caps
-          push
-          color="orange"
-          text-color="blue"
-          label="Hiya!"
-          @click="profileName"
-        />
       </q-carousel-slide>
       <q-carousel-slide
         name="style"
         class="column no-wrap flex-center"
       >
-        <div class="text-center">
-          Choose your user avatar!
+        <div class="q-pa-md q-ma-md onboardCard">
+          <div class="text-center txtH2">Create Avatar</div>
+          <div class="flex row">
+            <q-avatar
+              rounded
+              size="8rem"
+              color="grey"
+              class="q-mt-lg q-mb-lg"
+              id="avatar"
+            >
+              <img :src="svg">
+            </q-avatar>
+            <div class="q-pa-lg flex flex-center column">
+              <q-btn
+                no-caps
+                push
+                color="yellow"
+                text-color="primary"
+                label="Change Avatar"
+                @click="designer"
+              />
+              <q-btn
+                class="q-mt-lg"
+                no-caps
+                push
+                color="teal-6"
+                text-color="white"
+                label="Toggle Accessory"
+                @click="toggler"
+              />
+            </div>
+          </div>
         </div>
-        <q-avatar
-          rounded
-          size="10rem"
-          color="positive"
-          class="q-mt-lg q-mb-lg"
-        >
-          <img :src="svg">
-        </q-avatar>
-        <q-btn
-          no-caps
-          push
-          color="white"
-          text-color="primary"
-          label="Change Avatar"
-          @click="designer"
-        />
-        <q-btn
-          class="q-mt-lg"
-          no-caps
-          push
-          color="white"
-          text-color="warning"
-          label="Toggle Accessory"
-          @click="toggler"
-        />
+        <div class="q-pa-md q-ma-md onboardCard">
+          <div class="text-center txtH2">Email Verification</div>
+          <div class="q-mb-lg text-center">
+            <EmailVerifier />
+          </div>
+        </div>
       </q-carousel-slide>
       <q-carousel-slide
         name="outro"
         class="column no-wrap flex-center"
       >
-        <q-icon
-          name="terrain"
-          size="56px"
-        />
-        <div class="q-mt-lg q-mb-lg text-center">
-          Pleasure getting to know you, {{nameVal || "friend"}}
+        <div class="q-pa-md q-ma-md onboardCard text-center">
+          <div class="q-mt-lg q-mb-lg txtH2">
+            <span v-if="nameVal">Pleasure getting to know you, {{ nameVal }}!<br>🤝</span>
+            <span v-else>
+              Hello there! Please fill up a few deets for us to setup your account. ✍
+            </span>
+          </div>
+          <q-btn
+            v-if="nameVal"
+            push
+            color="positive"
+            text-color="white"
+            label="Open Dashboard"
+            @click="finisher"
+          />
+          <q-btn
+            v-else
+            push
+            color="orange"
+            text-color="white"
+            label="Press Here"
+            @click="profileName"
+          />
         </div>
-        <q-btn
-          no-caps
-          push
-          color="positive"
-          text-color="purple"
-          label="To Dashboard"
-          @click="finisher"
-        />
       </q-carousel-slide>
     </q-carousel>
   </q-page>
@@ -241,7 +240,7 @@ export default defineComponent({
           .replace(/([A-Z])/g, " $1")
           .replace(/^./, (str) => str.toUpperCase())}:`,
         timeout: 0,
-        position: "top",
+        position: "bottom",
         color: "dark",
         group: false,
         classes: "center",
@@ -250,7 +249,7 @@ export default defineComponent({
         },
         actions: [
           {
-            label: "NEXT",
+            label: "SWITCH FEATURE",
             noDismiss: true,
             handler: () => {
               shifted = notifs[0];
@@ -272,7 +271,7 @@ export default defineComponent({
                         noDismiss: false,
                       },
                       {
-                        label: "SWITCH",
+                        label: "NEXT",
                         noDismiss: true,
                         handler: () => {
                           svg.value = createAvatar(
@@ -286,7 +285,7 @@ export default defineComponent({
             },
           },
           {
-            label: "SWITCH",
+            label: "NEXT",
             noDismiss: true,
             handler: () => {
               svg.value = createAvatar(bigSmile, createOptions(props, shifted));
@@ -437,4 +436,18 @@ export default defineComponent({
 <style lang="sass">
 .center
 	text-align: center
+.onboardCard
+	position: relative
+	backdrop-filter: blur(5px)
+	background-color: rgba(255, 255, 255, 1)
+	border-radius: 26px
+	box-shadow: 35px 35px 68px 0px rgba(145, 192, 255, 0.5), inset -8px -8px 16px 0px rgba(145, 192, 255, 0.6), inset 0px 11px 28px 0px rgb(255, 255, 255)
+	margin: auto
+	margin-top: 2em
+	margin-bottom: 2em
+.txtH2
+	font-size: 2rem
+	color: black
+#avatar
+	border: 1px solid black
 </style>

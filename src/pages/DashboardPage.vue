@@ -3,19 +3,62 @@
     class="flex flex-center column pageBg"
     padding
   >
-    <div class="text-h2 q-my-md">Dashboard</div>
-    <q-avatar
-      rounded
-      size="10rem"
-      color="positive"
-      class="q-mt-lg q-mb-lg"
-    >
-      <img
-        v-if="svg"
-        :src="svg"
+    <div class="txtH2 q-my-xs text-center">Dashboard</div>
+    <div class="q-pa-md q-ma-md dashCard">
+      <div class="flex justify-evenly row">
+        <q-avatar
+          rounded
+          size="10rem"
+          color="green-12"
+          class="q-mt-lg q-mb-md"
+          id="dashAvt"
+        >
+          <img
+            v-if="svg"
+            :src="svg"
+          >
+        </q-avatar>
+        <div class="flex justify-evenly column">
+          <div class="q-py-sm txtH5">
+            <div class="flex justify-around row">
+              <div>{{userName}}, {{userAge}}</div>
+              <div>{{createdArr.length}} {{createdArr.length == 1 ? 'Montage' : 'Montages'}}</div>
+            </div>
+          </div>
+          <q-chip
+            class="q-pa-md"
+            color="pink-11"
+          >
+            <div class="q-py-sm txtH5">{{userEmail}}</div>
+          </q-chip>
+        </div>
+      </div>
+    </div>
+    <div class="text-center">
+      <div class="text-h4">Past Creations 👻</div>
+      <div
+        v-if="createdArr.length > 0"
+        class="text-center flex column justify-evenly"
       >
-    </q-avatar>
-    <AuthHandler />
+        <div
+          v-for="(item, index) in createdArr"
+          :key="index"
+          class="q-pa-md q-ma-md dashCard"
+        >
+          <div class="flex row items-center justify-around">
+            <div>Publish ID: <i>{{item}}</i></div>
+            <q-btn
+              label="Go"
+              color="red"
+              @click="viewMontage(item)"
+            />
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="text-center text-h6">No Projects Yet...</div>
+      </div>
+    </div>
     <div class="text-h4 text-center">Follow These Steps to Begin! 👇</div>
     <q-stepper
       v-model="step"
@@ -85,6 +128,7 @@
       @click="startPicking"
       size="lg"
     />
+    <AuthHandler />
   </q-page>
 </template>
 
@@ -112,10 +156,18 @@ export default defineComponent({
     const nameVal = ref("");
     const step = ref(1);
     const svg = ref();
+    const createdArr = ref([]);
+    const userName = ref("");
+    const userAge = ref(0);
+    const userEmail = ref("");
 
     onMounted(async () => {
       const dash = await api.get("/api/dash");
       svg.value = createAvatar(bigSmile, dash.data.profile);
+      createdArr.value = dash.data.montages;
+      userName.value = dash.data.name;
+      userAge.value = dash.data.age;
+      userEmail.value = dash.data.email;
     });
 
     const startPicking = () => {
@@ -149,10 +201,24 @@ export default defineComponent({
         });
     };
 
+    const viewMontage = (id) => {
+      router.push({
+        name: "Viewer",
+        params: {
+          id,
+        },
+      });
+    };
+
     return {
       startPicking,
       step,
       svg,
+      createdArr,
+      userName,
+      userAge,
+      userEmail,
+      viewMontage,
     };
   },
 });
@@ -161,4 +227,21 @@ export default defineComponent({
 <style lang="sass">
 #stepCard
 	width: 80vw
+.dashCard
+	backdrop-filter: blur(5px)
+	background-color: rgba(255, 255, 255, 1)
+	border-radius: 26px
+	box-shadow: 35px 35px 68px 0px rgba(145, 192, 255, 0.5), inset -8px -8px 16px 0px rgba(145, 192, 255, 0.6), inset 0px 11px 28px 0px rgb(255, 255, 255)
+	width: 70vw
+	margin: auto
+	margin-top: 2em
+	margin-bottom: 2.5em
+	body.screen--sm &
+		width: 90vw
+.txtH2
+	font-size: 3em
+.txtH5
+	font-size: 1.5em
+#dashAvt
+	border-radius: 50%
 </style>

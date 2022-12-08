@@ -11,7 +11,7 @@
     <br>
     <q-btn
       :label="!store.verified ? `Verify Code` : `Verified!`"
-      color="orange"
+      color="deep-orange"
       @click="verify"
       :disable="store.verified"
     />

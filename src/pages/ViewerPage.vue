@@ -9,7 +9,8 @@
         <q-avatar
           rounded
           size="7rem"
-          color="positive"
+          color="green-12"
+          id="viewAvt"
           class="q-mt-lg q-mb-lg"
         >
           <img
@@ -159,4 +160,6 @@ export default defineComponent({
 	position: absolute
 	top: 50%
 	transform: translateY(-50%)
+#viewAvt
+	border-radius: 50%
 </style>

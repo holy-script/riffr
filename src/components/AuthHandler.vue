@@ -1,11 +1,30 @@
 <template>
-  <q-btn
-    no-caps
-    push
-    color="primary"
-    :label="!store.loggedIn ? `Let's Get Started!` : `Account Settings`"
-    @click="show()"
-  />
+  <div v-if="showSettings">
+    <q-btn
+      no-caps
+      push
+      color="primary"
+      label="Let's Get Started!"
+      @click="show()"
+    />
+  </div>
+  <div v-else>
+    <q-page-sticky
+      :offset="[18, 18]"
+      position="top-left"
+    >
+      <q-btn
+        id="logout"
+        @click="show()"
+        color="brown"
+      >
+        <q-icon
+          :name="`img:${settingsIcon}`"
+          size="md"
+        />
+      </q-btn>
+    </q-page-sticky>
+  </div>
 </template>
 
 <script>
@@ -17,6 +36,7 @@ import signupIcon from "assets/icons/icons8-add-100.png";
 import loginIcon from "assets/icons/icons8-enter-100.png";
 import changeIcon from "assets/icons/icons8-password-reset-100.png";
 import deleteIcon from "assets/icons/icons8-delete-database-100.png";
+import settingsIcon from "assets/icons/icons8-settings-100.png";
 import { api } from "boot/axios";
 
 export default defineComponent({
@@ -32,6 +52,7 @@ export default defineComponent({
     const pwdValOld = ref("");
     const pwdShow = ref(false);
     const pwdIsNew = ref(false);
+    const showSettings = router.currentRoute.value.name == "Home";
 
     const signUp = async () => {
       try {
@@ -270,65 +291,71 @@ export default defineComponent({
     };
 
     const show = (grid) => {
-      $q.bottomSheet({
-        dark: true,
-        message: "Choose an action:",
-        grid: true,
-        style: {
-          fontSize: "1rem",
-        },
-        class: "iconizer",
-        actions: store.loggedIn
-          ? [
-              {
-                label: "Change Password",
-                img: changeIcon,
-                color: "primary",
-                id: "reset",
+      store.loggedIn && showSettings
+        ? router.push({
+            name: "Dashboard",
+          })
+        : $q
+            .bottomSheet({
+              dark: true,
+              message: "Choose an action:",
+              grid: true,
+              style: {
+                fontSize: "1rem",
               },
-              {
-                label: "Remove Account & Data",
-                img: deleteIcon,
-                color: "primary",
-                id: "remove",
-              },
-            ]
-          : [
-              {
-                label: "Sign Up",
-                img: signupIcon,
-                color: "primary",
-                id: "signup",
-              },
-              {
-                label: "Log In",
-                img: loginIcon,
-                color: "primary",
-                id: "login",
-              },
-            ],
-      }).onOk((action) => {
-        console.log("Action chosen:", action.id);
-        switch (action.id) {
-          case "signup":
-            pwdIsNew.value = true;
-            email("Sign Up", pwd, "Set your password!", signUp);
-            break;
-          case "login":
-            pwdIsNew.value = false;
-            email("Sign In", pwd, "Enter your password!", logIn);
-            break;
-          case "reset":
-            pwdIsNew.value = false;
-            pwd("Reset Password", "Verify current password:", change);
-            break;
-          case "remove":
-            removal();
-        }
-      });
+              class: "iconizer",
+              actions: store.loggedIn
+                ? [
+                    {
+                      label: "Change Password",
+                      img: changeIcon,
+                      color: "primary",
+                      id: "reset",
+                    },
+                    {
+                      label: "Remove Account & Data",
+                      img: deleteIcon,
+                      color: "primary",
+                      id: "remove",
+                    },
+                  ]
+                : [
+                    {
+                      label: "Sign Up",
+                      img: signupIcon,
+                      color: "primary",
+                      id: "signup",
+                    },
+                    {
+                      label: "Log In",
+                      img: loginIcon,
+                      color: "primary",
+                      id: "login",
+                    },
+                  ],
+            })
+            .onOk((action) => {
+              console.log("Action chosen:", action.id);
+              switch (action.id) {
+                case "signup":
+                  pwdIsNew.value = true;
+                  email("Sign Up", pwd, "Set your password!", signUp);
+                  break;
+                case "login":
+                  pwdIsNew.value = false;
+                  email("Sign In", pwd, "Enter your password!", logIn);
+                  break;
+                case "reset":
+                  pwdIsNew.value = false;
+                  pwd("Reset Password", "Verify current password:", change);
+                  break;
+                case "remove":
+                  removal();
+              }
+            });
     };
 
-    return { show, store };
+    return { show, store, showSettings, settingsIcon };
   },
 });
 </script>

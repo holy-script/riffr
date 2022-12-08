@@ -36,10 +36,11 @@
     >
       <div class="flex column items-center">
         <q-btn
-          color="yellow"
-          label="Next Face"
+          color="yellow-8"
+          text-color="black"
           @click="nextFace"
-        />
+          push
+        >Next<br>Face</q-btn>
       </div>
     </q-page-sticky>
     <q-page-sticky
@@ -47,7 +48,7 @@
       :offset="[18, 18]"
       v-show="!isPlaying && !hidden"
     >
-      <div class="flex column items-center">
+      <div class="q-pa-md q-ma-md scalerCard flex column items-center">
         <q-slider
           v-model="scaler"
           @change="changeScale"
@@ -55,13 +56,14 @@
           :markers="5"
           :step="5"
           :max="50"
-          color="green"
+          color="light-green-13"
+          label-text-color="black"
           vertical
           reverse
           label-always
           snap
         />
-        <q-chip icon="center_focus_strong">Zoom</q-chip>
+        <q-chip icon="center_focus_strong"><strong>Zoom</strong></q-chip>
       </div>
     </q-page-sticky>
     <q-page-sticky
@@ -69,38 +71,42 @@
       :offset="[18, 18]"
       v-show="!isPlaying && !hidden"
     >
-      <div class="flex column items-center">
+      <div class="q-pa-md q-ma-md fpsCard flex column items-center">
         <q-knob
           show-value
           v-model="frameRate"
           size="5rem"
           :thickness="0.2"
-          color="orange"
-          center-color="grey-8"
-          track-color="transparent"
+          color="cyan-7"
+          center-color="pink-2"
+          track-color="cyan-3"
           :min="4"
           :max="10"
+          class="q-mb-sm"
         >
           {{ frameRate }}
         </q-knob>
-        <q-chip icon="shutter_speed">FPS</q-chip>
+        <q-chip icon="shutter_speed"><strong>FPS</strong></q-chip>
       </div>
     </q-page-sticky>
     <q-page-sticky
       position="bottom"
-      :offset="[0, 18]"
+      :offset="[0, 36]"
     >
       <q-btn
         icon="arrow_circle_left"
-        color="green"
+        color="teal-5"
         @click="prevFrame"
-      />
+      >
+        <q-tooltip class="text-center">Previous<br>Image</q-tooltip>
+      </q-btn>
       <q-fab
         v-model="previewBtn"
-        label="Preview"
+        label="Controls"
+        label-position="bottom"
         external-label
         vertical-actions-align="left"
-        color="purple"
+        color="purple-13"
         icon="keyboard_arrow_up"
         direction="up"
         square
@@ -109,20 +115,30 @@
         <q-fab-action
           square
           external-label
-          color="primary"
+          color="amber-5"
+          @click="showColor = true"
+          icon="palette"
+          label="Background"
+        />
+        <q-fab-action
+          square
+          external-label
+          color="deep-orange-5"
           @click="previewPublish"
           icon="polyline"
           label="Publish"
         />
         <q-fab-action
+          v-if="isPlaying"
           square
           external-label
-          color="secondary"
+          color="orange"
           @click="previewPause"
           icon="pause_circle"
           label="Pause"
         />
         <q-fab-action
+          v-else
           square
           external-label
           color="orange"
@@ -133,32 +149,46 @@
       </q-fab>
       <q-btn
         icon="arrow_circle_right"
-        color="green"
+        color="teal-5"
         @click="nextFrame"
-      />
+      >
+        <q-tooltip class="text-center">Next<br>Image</q-tooltip>
+      </q-btn>
     </q-page-sticky>
     <q-page-sticky
       position="top"
-      :offset="[0, 36]"
+      :offset="[0, 40]"
     >
       <q-btn
         color="blue"
         :icon="hidden ? `visibility` : `visibility_off`"
         @click="hidden = !hidden"
-      />
+      >
+        <q-tooltip class="text-center">{{hidden? 'Show Tools': 'Hide Tools'}}</q-tooltip>
+      </q-btn>
     </q-page-sticky>
-    <q-page-sticky
-      position="top-left"
-      :offset="[18, 18]"
+    <q-dialog
+      v-model="showColor"
+      seamless
     >
-      <ColorPicker
-        theme="dark"
-        :color="bg"
-        :sucker-hide="true"
-        @changeColor="changeColor"
-        id="colorPicker"
-      />
-    </q-page-sticky>
+      <q-card>
+        <q-card-section class="column items-center no-wrap">
+          <ColorPicker
+            theme="dark"
+            :color="bg"
+            :sucker-hide="true"
+            @changeColor="changeColor"
+            id="colorPicker"
+          />
+          <q-btn
+            class="q-mt-md"
+            label="Close"
+            color="red-7"
+            @click="showColor = false"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -174,7 +204,6 @@ import {
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
-import ml5 from "ml5";
 import gsap from "gsap";
 import { useWebWorker } from "@vueuse/core";
 import { ColorPicker } from "vue-color-kit";
@@ -221,6 +250,7 @@ export default defineComponent({
     const capture = ref(false);
     const montage = ref([]);
     const marker = ref([]);
+    const showColor = ref(false);
 
     const { data, post, terminate } = useWebWorker("./bitmapWorker.js");
 
@@ -498,6 +528,7 @@ export default defineComponent({
       prevFrame,
       bg,
       changeColor,
+      showColor,
     };
   },
 });
@@ -524,4 +555,22 @@ export default defineComponent({
 	overflow: hidden
 #colorPicker
 	width: 14rem !important
+.fpsCard
+	position: relative
+	backdrop-filter: blur(5px)
+	background-color: rgba(255, 255, 255, 1)
+	border-radius: 26px
+	box-shadow: -10px 10px 68px 0px rgba(145, 192, 255, 0.5), inset -8px -8px 16px 0px rgba(145, 192, 255, 0.6), inset 0px 11px 28px 0px rgb(255, 255, 255)
+	margin: auto
+	margin-top: 2em
+	margin-bottom: 2em
+.scalerCard
+	position: relative
+	backdrop-filter: blur(5px)
+	background-color: rgba(255, 255, 255, 1)
+	border-radius: 26px
+	box-shadow: 10px 10px 68px 0px rgba(145, 192, 255, 0.5), inset -8px -8px 16px 0px rgba(145, 192, 255, 0.6), inset 0px 11px 28px 0px rgb(255, 255, 255)
+	margin: auto
+	margin-top: 2em
+	margin-bottom: 2em
 </style>
