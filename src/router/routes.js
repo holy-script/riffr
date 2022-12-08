@@ -55,7 +55,7 @@ const routes = [
 				name: "Viewer",
 				path: "view/:id",
 				meta: {
-					requiresAuth: true,
+					requiresAuth: false,
 				},
 				component: () => import("pages/ViewerPage.vue"),
 			},
