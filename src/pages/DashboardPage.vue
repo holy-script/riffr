@@ -34,31 +34,6 @@
         </div>
       </div>
     </div>
-    <div class="text-center">
-      <div class="text-h4">Past Creations 👻</div>
-      <div
-        v-if="createdArr.length > 0"
-        class="text-center flex column justify-evenly"
-      >
-        <div
-          v-for="(item, index) in createdArr"
-          :key="index"
-          class="q-pa-md q-ma-md dashCard"
-        >
-          <div class="flex row items-center justify-around">
-            <div>Publish ID: <i>{{item}}</i></div>
-            <q-btn
-              label="Go"
-              color="red"
-              @click="viewMontage(item)"
-            />
-          </div>
-        </div>
-      </div>
-      <div v-else>
-        <div class="text-center text-h6">No Projects Yet...</div>
-      </div>
-    </div>
     <div class="text-h4 text-center">Follow These Steps to Begin! 👇</div>
     <q-stepper
       v-model="step"
@@ -83,7 +58,7 @@
         icon="create_new_folder"
         :done="step > 2"
       >
-        The File button will help you start picking images out: you can also set the max page items from the button below 'Upload'. Feel free to browse through the images, you can add or delete as you wish. For ordering, it is recommended to name them in an alphabetical order and then add them here. Once the machine learning model is ready, click 'Detect' and images without faces, if any, will be removed. Finally, the 'Next' button is enabled and you can proceed to the editor.
+        The File button will help you start picking images out: you can also set the max page items from the button below 'Upload'. Feel free to browse through the images, you can add or delete as you wish. For ordering, it is recommended to name them in an alphabetical order and then add them here. Toggle between in-browser or on-server ML models and the output extension (.gif or .video) through the 'Options' menu. Once the machine learning model is ready(waiting only required for in-browser), click 'Detect' and images without faces, if any, will be removed. Finally, the 'Next' button is enabled and you can proceed to the editor.
       </q-step>
 
       <q-step
@@ -93,7 +68,7 @@
         :done="step > 3"
       >
         Now, you will need to set the correct face on each of the images by clicking 'Next Face'.
-        There's an FPS Counter knob that you can set to determined the flip speed of the montage. You'll also have the option to zoom in/out, depending on how much of the source image you'd like to be shown. Lastly, there's three buttons: 'Play' & 'Pause', that'll let you see how it's looking with the current settings, and the 'Publish' button, that moves you on to the next step.
+        There's an FPS Counter knob that you can set to determined the flip speed of the montage. You'll also have the option to zoom in/out, depending on how much of the source image you'd like to be shown. Lastly, there's three buttons: 'Play'/'Pause', that'll let you see how it's looking with the current settings, and the 'Publish' button, that moves you on to the next step, and the 'Background' button, that chooses the color of the background. Zoom & FPS tools can be toggled shown/hidden from the button near the top.
       </q-step>
 
       <q-step
@@ -101,7 +76,7 @@
         title="Create and download the Montage!"
         icon="video_settings"
       >
-        Here, everything is generated automatically, and as soon as the process finishes, congratulations! You will have a video created that you can download to your device.
+        Here, everything is generated automatically, and as soon as the process finishes, congratulations! You will have a video/gif created that you can download to your device. Also, there will be an option to download a QR Code that links to the viewership page for this creation, and subsequently a link you can copy to the clipboard.
       </q-step>
 
       <template v-slot:navigation>
@@ -128,6 +103,31 @@
       @click="startPicking"
       size="lg"
     />
+    <div class="text-center q-mt-lg">
+      <div class="text-h4">Past Creations 👻</div>
+      <div
+        v-if="createdArr.length > 0"
+        class="text-center flex column justify-evenly"
+      >
+        <div
+          v-for="(item, index) in createdArr"
+          :key="index"
+          class="q-pa-md q-ma-md dashCard"
+        >
+          <div class="flex row items-center justify-around">
+            <div>Publish ID: <i>{{item}}</i></div>
+            <q-btn
+              label="Go"
+              color="red"
+              @click="viewMontage(item)"
+            />
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="text-center text-h6">No Projects Yet...</div>
+      </div>
+    </div>
     <AuthHandler />
   </q-page>
 </template>

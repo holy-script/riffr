@@ -29,7 +29,7 @@
         <q-separator inset />
 
         <q-card-section class="text-h6">
-          Riffr uses a Machine Learning pre-trained model graciously provided by <a href="http://ml5js.org">ml5</a> and uses it to detect faces in photos. Then, it helps you put your face front and center of the montage, so you can show yourself transition through the images like a quick flipbook📗.
+          Riffr uses a Machine Learning pre-trained model graciously provided by <a href="http://ml5js.org">ml5</a> for in-browser or <a href="http://ml5js.org">face-api</a> for in-server and uses it to detect faces in photos. Then, it helps you put your face front and center of the montage, so you can show yourself transition through the images like a quick flipbook📗.
         </q-card-section>
       </q-card>
     </div>

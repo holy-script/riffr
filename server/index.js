@@ -334,7 +334,7 @@ app.post("/api/upload", [jwtAuth.verifyToken], async (req, res) => {
 	});
 });
 
-app.get("/api/:montageName", [jwtAuth.verifyToken], async (req, res) => {
+app.get("/api/:montageName", async (req, res) => {
 	const montage = await Montage.findOne({
 		name: req.params.montageName,
 	});
