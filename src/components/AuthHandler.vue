@@ -293,7 +293,7 @@ export default defineComponent({
     const show = (grid) => {
       store.loggedIn && showSettings
         ? router.push({
-            name: "Dashboard",
+            name: store.onboarded ? "Dashboard" : "Onboard",
           })
         : $q
             .bottomSheet({
