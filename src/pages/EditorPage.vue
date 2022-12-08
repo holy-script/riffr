@@ -195,6 +195,31 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+    <q-dialog
+      v-model="loading"
+      persistent
+      transition-show="scale"
+      transition-hide="scale"
+    >
+      <q-card
+        class="bg-teal text-white"
+        style="width: 300px"
+      >
+        <q-card-section>
+          <div class="text-center text-h6">Editor Loader</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none text-center">
+          <q-spinner-gears
+            size="xl"
+            color="black"
+          />
+          <br>
+          <br>
+          <span>Setting things up...</span>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -257,6 +282,7 @@ export default defineComponent({
     const montage = ref([]);
     const marker = ref([]);
     const showColor = ref(false);
+    const loading = ref(true);
 
     const { data, post, terminate } = useWebWorker("./bitmapWorker.js");
 
@@ -266,6 +292,7 @@ export default defineComponent({
         if (data.value.i == 0) {
           multiple.value = boxes.value[0].length > 1;
           draw();
+          loading.value = false;
         }
       }
     });
@@ -535,6 +562,7 @@ export default defineComponent({
       bg,
       changeColor,
       showColor,
+      loading,
     };
   },
 });
