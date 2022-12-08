@@ -147,6 +147,18 @@
         @click="hidden = !hidden"
       />
     </q-page-sticky>
+    <q-page-sticky
+      position="top-left"
+      :offset="[18, 18]"
+    >
+      <ColorPicker
+        theme="dark"
+        :color="bg"
+        :sucker-hide="true"
+        @changeColor="changeColor"
+        id="colorPicker"
+      />
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -165,9 +177,15 @@ import { useStore } from "stores/app";
 import ml5 from "ml5";
 import gsap from "gsap";
 import { useWebWorker } from "@vueuse/core";
+import { ColorPicker } from "vue-color-kit";
+import "vue-color-kit/dist/vue-color-kit.css";
 
 export default defineComponent({
   name: "EditorPage",
+
+  components: {
+    ColorPicker,
+  },
 
   setup() {
     const router = useRouter();
@@ -193,7 +211,7 @@ export default defineComponent({
       width: 0,
       height: 0,
     });
-    const bg = ref("#000");
+    const bg = ref("#000000");
     const hidden = ref(false);
     const multiple = ref(false);
     const frameRate = ref(7);
@@ -455,6 +473,11 @@ export default defineComponent({
         });
     };
 
+    const changeColor = (obj) => {
+      bg.value = obj.hex;
+      draw();
+    };
+
     return {
       showBox,
       handleSwipe,
@@ -473,6 +496,8 @@ export default defineComponent({
       store,
       nextFrame,
       prevFrame,
+      bg,
+      changeColor,
     };
   },
 });
@@ -497,4 +522,6 @@ export default defineComponent({
 	z-index: 10
 #editor
 	overflow: hidden
+#colorPicker
+	width: 14rem !important
 </style>

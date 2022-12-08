@@ -61,6 +61,7 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useStore } from "stores/app";
 import gifshot from "gifshot";
+import { api } from "boot/axios";
 
 export default defineComponent({
   name: "CompilerPage",
@@ -115,6 +116,45 @@ export default defineComponent({
       window.removeEventListener("beforeunload", unloadWarn);
     });
 
+    const uploadFile = async (file) => {
+      const signedUrl = await api.post("/api/upload", {
+        fileName: `${store.montageName}.${store.isExtWebm ? "webm" : "gif"}`,
+      });
+
+      $q.notify({
+        message: signedUrl.data.message,
+        color: "dark",
+        progress: true,
+      });
+
+      return new Promise((resolve, reject) => {
+        const xhr = new window.XMLHttpRequest();
+        xhr.open("PUT", signedUrl.data.url);
+        xhr.onload = resolve;
+        xhr.onerror = reject;
+        xhr.setRequestHeader("Content-Type", "application/octet-stream");
+        xhr.send(file);
+        xhr.addEventListener("load", () => {
+          $q.notify({
+            message: "Uploaded to Riffr Gallery!",
+            actions: [
+              {
+                title: "LINK",
+              },
+              {
+                title: "DISMISS",
+              },
+              {
+                title: "QR CODE",
+              },
+            ],
+            timeout: 0,
+            color: "dark",
+          });
+        });
+      });
+    };
+
     watch(count, (val) => {
       if (val == store.montage.length && !started) {
         started = true;
@@ -151,6 +191,10 @@ export default defineComponent({
             },
             (obj) => {
               store.createGif(obj.image);
+              fetch(obj.image).then(async (res) => {
+                const blob = await res.blob();
+                uploadFile(blob).catch((error) => console.log(error));
+              });
             }
           );
         }
@@ -176,6 +220,8 @@ export default defineComponent({
         mediaRecorder.onstop = (event) => {
           const blob = new Blob(recordedChunks, { type: "video/webm" });
           recordedChunks = [];
+
+          uploadFile(blob).catch((error) => console.log(error));
 
           const url = URL.createObjectURL(blob);
           res(url);

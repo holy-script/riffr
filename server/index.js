@@ -17,8 +17,8 @@ import url from "url";
 import fs from "fs/promises";
 import "@tensorflow/tfjs-node";
 import canvas from "canvas";
-
 import faceapi from "@vladmandic/face-api";
+import { Storage } from "@google-cloud/storage";
 
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
@@ -34,6 +34,19 @@ const mg = mailgun.client({
 	key: process.env.MAILGUN_API_KEY,
 });
 const secret = process.env.JWT_SECRET;
+const storage = new Storage({
+	keyFilename: path.join(__dirname, process.env.KEY_FILE),
+	projectId: process.env.PROJECT_ID,
+});
+const bucketName = process.env.BUCKET_NAME;
+await storage.bucket(bucketName).setCorsConfiguration([
+	{
+		maxAgeSeconds: 3600,
+		method: ["PUT"],
+		origin: ["http://localhost:9000"],
+		responseHeader: ["content-type"],
+	},
+]);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -270,6 +283,23 @@ app.post("/api/detect", [jwtAuth.verifyToken], async (req, res) => {
 	fs.unlink(file.tempFilePath);
 	res.status(200).send({
 		detections,
+	});
+});
+
+app.post("/api/upload", [jwtAuth.verifyToken], async (req, res) => {
+	const options = {
+		version: "v4",
+		action: "write",
+		expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+		contentType: "application/octet-stream",
+	};
+	const [url] = await storage
+		.bucket(bucketName)
+		.file(req.body.fileName)
+		.getSignedUrl(options);
+	res.status(200).send({
+		message: "Starting Upload...",
+		url,
 	});
 });
 
