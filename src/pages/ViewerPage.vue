@@ -4,8 +4,8 @@
     class="pageBg"
     padding
   >
-    <div class="q-pa-md q-ma-md viewCard">
-      <div id="viewAvatar">
+    <div class="q-pa-md q-ma-md viewCard flex justify-evenly row">
+      <div>
         <q-avatar
           rounded
           size="7rem"
@@ -19,9 +19,11 @@
           >
         </q-avatar>
       </div>
-      <div class="text-center text-h3">{{ shortName }}</div>
-      <div class="text-center text-h6">
-        Created {{ timeAgo }}
+      <div class="flex flex-center column">
+        <div class="text-center text-h3">{{ shortName }}</div>
+        <div class="text-center text-h6">
+          Created {{ timeAgo }}
+        </div>
       </div>
     </div>
     <div class="q-pa-md q-ma-md viewCard">
@@ -46,7 +48,9 @@
       <div class="text-center text-h6">
         Using {{ count }} Images
       </div>
-      <div class="text-center text-h4">{{ creator }}</div>
+      <div class="text-center">
+        <q-chip>{{ creator }}</q-chip>
+      </div>
       <div class="text-center text-h6">
         Made This Montage!
       </div>
@@ -142,7 +146,6 @@ export default defineComponent({
 #compiler
 	text-align: center
 .viewCard
-	position: relative
 	backdrop-filter: blur(5px)
 	background-color: rgba(255, 255, 255, 1)
 	border-radius: 26px
@@ -156,10 +159,6 @@ export default defineComponent({
 .viewPlayer
 	width: 100%
 	border-radius: 14px
-#viewAvatar
-	position: absolute
-	top: 50%
-	transform: translateY(-50%)
 #viewAvt
 	border-radius: 50%
 </style>

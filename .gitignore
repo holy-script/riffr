@@ -30,3 +30,5 @@ yarn-error.log*
 .vscode
 .env
 config.json
+certificate.crt
+private.key

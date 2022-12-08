@@ -44,7 +44,7 @@
       </div>
     </q-page-sticky>
     <q-page-sticky
-      position="left"
+      :position="`${$q.platform.is.mobile?'top-left':'left'}`"
       :offset="[18, 18]"
       v-show="!isPlaying && !hidden"
     >
@@ -63,11 +63,14 @@
           label-always
           snap
         />
-        <q-chip icon="center_focus_strong"><strong>Zoom</strong></q-chip>
+        <q-chip
+          :size="`${$q.platform.is.mobile?'xs':''}`"
+          icon="center_focus_strong"
+        ><strong>Zoom</strong></q-chip>
       </div>
     </q-page-sticky>
     <q-page-sticky
-      position="bottom-right"
+      :position="`${$q.platform.is.mobile ? 'top-right':'bottom-right'}`"
       :offset="[18, 18]"
       v-show="!isPlaying && !hidden"
     >
@@ -75,7 +78,7 @@
         <q-knob
           show-value
           v-model="frameRate"
-          size="5rem"
+          :size="`${$q.platform.is.mobile?'3.5rem':'5rem'}`"
           :thickness="0.2"
           color="cyan-7"
           center-color="pink-2"
@@ -86,7 +89,10 @@
         >
           {{ frameRate }}
         </q-knob>
-        <q-chip icon="shutter_speed"><strong>FPS</strong></q-chip>
+        <q-chip
+          :size="`${$q.platform.is.mobile?'xs': ''}`"
+          icon="shutter_speed"
+        ><strong>FPS</strong></q-chip>
       </div>
     </q-page-sticky>
     <q-page-sticky

@@ -20,7 +20,7 @@
         </q-avatar>
         <div class="flex justify-evenly column">
           <div class="q-py-sm txtH5">
-            <div class="flex justify-around row">
+            <div :class="`flex justify-around ${$q.platform.is.mobile ? 'column flex-center': 'row'}`">
               <div>{{userName}}, {{userAge}}</div>
               <div>{{createdArr.length}} {{createdArr.length == 1 ? 'Montage' : 'Montages'}}</div>
             </div>
@@ -29,7 +29,7 @@
             class="q-pa-md"
             color="pink-11"
           >
-            <div class="q-py-sm txtH5">{{userEmail}}</div>
+            <div :class="`q-py-sm ${$q.platform.is.mobile ? '' : 'text-h6'}`">{{userEmail}}</div>
           </q-chip>
         </div>
       </div>

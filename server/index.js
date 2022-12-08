@@ -21,6 +21,8 @@ import canvas from "canvas";
 import faceapi from "@vladmandic/face-api";
 import { Storage } from "@google-cloud/storage";
 import { nanoid } from "nanoid/async";
+import https from "https";
+import fsync from "fs";
 
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
@@ -45,7 +47,7 @@ await storage.bucket(bucketName).setCorsConfiguration([
 	{
 		maxAgeSeconds: 3600,
 		method: ["PUT"],
-		origin: ["http://localhost:9000"],
+		origin: [process.env.FRONTEND_URL],
 		responseHeader: ["content-type"],
 	},
 ]);
@@ -140,8 +142,9 @@ app.post("/auth/login", async (req, res) => {
 							expiresIn: 86400, // 24 hours
 						}),
 						{
-							httpOnly: true,
 							maxAge: 86400 * 1000,
+							secure: true,
+							sameSite: "none",
 						}
 					)
 					.send({
@@ -358,5 +361,13 @@ app.use("/", async (req, res) => {
 	res.send("Hello, world!");
 });
 
-app.listen(8000);
+https
+	.createServer(
+		{
+			cert: fsync.readFileSync(path.join(__dirname, "certificate.crt")),
+			key: fsync.readFileSync(path.join(__dirname, "private.key")),
+		},
+		app
+	)
+	.listen(8000);
 console.log("Listening at http://localhost:8000");
