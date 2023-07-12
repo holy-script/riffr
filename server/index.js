@@ -21,8 +21,6 @@ import canvas from "canvas";
 import faceapi from "@vladmandic/face-api";
 import { Storage } from "@google-cloud/storage";
 import { nanoid } from "nanoid/async";
-import https from "https";
-import fsync from "fs";
 
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
@@ -39,7 +37,7 @@ const mg = mailgun.client({
 });
 const secret = process.env.JWT_SECRET;
 const storage = new Storage({
-	keyFilename: path.join(__dirname, process.env.KEY_FILE),
+	keyFilename: path.join(__dirname, "config", process.env.KEY_FILE),
 	projectId: process.env.PROJECT_ID,
 });
 const bucketName = process.env.BUCKET_NAME;
@@ -361,13 +359,6 @@ app.use("/", async (req, res) => {
 	res.send("Hello, world!");
 });
 
-https
-	.createServer(
-		{
-			cert: fsync.readFileSync(path.join(__dirname, "certificate.crt")),
-			key: fsync.readFileSync(path.join(__dirname, "private.key")),
-		},
-		app
-	)
-	.listen(8000);
-console.log("Listening at http://localhost:8000");
+app.listen(8000, () => {
+	console.log("Listening at http://localhost:8000");
+});
