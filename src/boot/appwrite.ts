@@ -1,4 +1,4 @@
-import { Client, ID, Account, AppwriteException } from 'appwrite';
+import { Client, Account, AppwriteException } from 'appwrite';
 
 const client = new Client();
 const endpoint = process.env.API_ENDPOINT;
@@ -8,45 +8,39 @@ client.setEndpoint(endpoint).setProject(project);
 
 const account = new Account(client);
 
-const createUser = async (email: string, pwd: string) => {
-  try {
-    const res = await account.create(ID.unique(), email, pwd);
-    return res;
-  } catch (err) {
-    return (err as AppwriteException).message;
-  }
+const startSession = () => {
+	account.createOAuth2Session(
+		process.env.OAUTH_PROVIDER,
+		window.location.origin,
+		window.location.origin
+	);
 };
 
-const createSession = () => {
-  account.createOAuth2Session(
-    'google',
-    'http://localhost:9000/success',
-    'http://localhost:9000/failure'
-  );
-  // try {
-  //   const res = await account.createEmailSession(email, pwd);
-  //   return res;
-  // } catch (err) {
-  //   return (err as AppwriteException).message;
-  // }
+const createSession = async (userId: string, secret: string) => {
+	try {
+		const res = await account.createEmailSession(userId, secret);
+		return res;
+	} catch (err) {
+		return (err as AppwriteException).message;
+	}
+};
+
+const getSession = async () => {
+	try {
+		const res = await account.getSession('current');
+		return res;
+	} catch (err) {
+		return null;
+	}
 };
 
 const endSession = async () => {
-  try {
-    const res = await account.deleteSessions();
-    return res;
-  } catch (err) {
-    return (err as AppwriteException).message;
-  }
+	try {
+		const res = await account.deleteSessions();
+		return res;
+	} catch (err) {
+		return (err as AppwriteException).message;
+	}
 };
 
-const getUser = async () => {
-  try {
-    const res = await account.get();
-    return res;
-  } catch (err) {
-    return null;
-  }
-};
-
-export { createUser, createSession, endSession, getUser };
+export { startSession, createSession, getSession, endSession };
