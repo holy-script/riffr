@@ -14,14 +14,16 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
-import { startSession, createSession, getSession } from 'boot/appwrite';
+import { startSession, getSession } from 'boot/appwrite';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 import { useStore } from 'src/stores/app';
 
 export default defineComponent({
 	name: 'IndexPage',
 	setup() {
 		const $q = useQuasar();
+		const router = useRouter();
 		const store = useStore();
 
 		onMounted(async () => {
@@ -29,11 +31,12 @@ export default defineComponent({
 			console.log('session:', session);
 			if (session) {
 				store.logIn();
+				router.push({
+					name: 'Dashboard',
+				});
 			}
 
 			const urlParams = new URLSearchParams(window.location.search);
-			const userId = urlParams.get('userId');
-			const secret = urlParams.get('secret');
 			const error = urlParams.get('error');
 
 			if (error) {
@@ -44,15 +47,9 @@ export default defineComponent({
 				});
 				console.error(JSON.parse(error));
 			}
-
-			if (userId && secret) {
-				console.log('userId:', userId);
-				console.log('secret:', secret);
-				createSession(userId, secret);
-			}
 		});
 
-		return { startSession, createSession, store };
+		return { startSession, store };
 	},
 });
 </script>

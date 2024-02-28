@@ -8,7 +8,18 @@ const routes: RouteRecordRaw[] = [
 			{
 				name: 'Home',
 				path: '',
+				meta: {
+					requiresAuth: false,
+				},
 				component: () => import('pages/IndexPage.vue'),
+			},
+			{
+				name: 'Dashboard',
+				path: 'dash',
+				meta: {
+					requiresAuth: true,
+				},
+				component: () => import('pages/DashboardPage.vue'),
 			},
 		],
 	},

@@ -16,15 +16,6 @@ const startSession = () => {
 	);
 };
 
-const createSession = async (userId: string, secret: string) => {
-	try {
-		const res = await account.createEmailSession(userId, secret);
-		return res;
-	} catch (err) {
-		return (err as AppwriteException).message;
-	}
-};
-
 const getSession = async () => {
 	try {
 		const res = await account.getSession('current');
@@ -43,4 +34,4 @@ const endSession = async () => {
 	}
 };
 
-export { startSession, createSession, getSession, endSession };
+export { startSession, getSession, endSession };
