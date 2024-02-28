@@ -17,13 +17,18 @@ const createUser = async (email: string, pwd: string) => {
   }
 };
 
-const createSession = async (email: string, pwd: string) => {
-  try {
-    const res = await account.createEmailSession(email, pwd);
-    return res;
-  } catch (err) {
-    return (err as AppwriteException).message;
-  }
+const createSession = () => {
+  account.createOAuth2Session(
+    'google',
+    'http://localhost:9000/success',
+    'http://localhost:9000/failure'
+  );
+  // try {
+  //   const res = await account.createEmailSession(email, pwd);
+  //   return res;
+  // } catch (err) {
+  //   return (err as AppwriteException).message;
+  // }
 };
 
 const endSession = async () => {
